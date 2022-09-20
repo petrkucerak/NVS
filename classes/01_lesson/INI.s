@@ -1,14 +1,11 @@
 
 ;********************************************************************************
-;* JMÉNO SOUBORU	: INI1.S
+;* JMÉNO SOUBORU	: INI.S
 ;* AUTOR			: Michal TOMÁŠ
-;* DATUM			: 03/2009 , poznamky doplnky 9/2018 jf
+;* DATUM			: 03/2009
 ;* POPIS			: soubor s pojmenovanymi adresami registru
 ;********************************************************************************
-; Poznamka, obecne- adresy zacinajici 0x42xxxxxx tedy vetsi nez 0x42000000  jsou 
-; pro adresovani typu Bit - Banding
-; Adresy zacinajici 0x40xxx tedy nad 0x4000000 jsou pro normalni (zapis, cteni Word, Halfword, Byte) adresovani 
-;
+
 	AREA    STM32F10x_INI, CODE, READONLY    
 
 ;********************************************************************************
@@ -21,8 +18,8 @@ GPIOA_CRL			EQU		0x40010800
 GPIOA_CRH	 		EQU		0x40010804
 ;--------------------------------------------------------------------------------
 GPIOA_IDR	 		EQU		0x40010808 ; input data regist
-;GPIOA_IDR	bits     pro bitové adresování brany, Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
-AIDR15				EQU		0x4221013C; 15 nejvyssi bit, tedy PA_15, pro cteni Bit-Banding
+;GPIOA_IDR	bits
+AIDR15				EQU		0x4221013C; 15
 AIDR14				EQU		0x42210138; 14
 AIDR13				EQU		0x42210134; 13
 AIDR12				EQU		0x42210130; 12
@@ -37,12 +34,12 @@ AIDR4				EQU		0x42210110; 4
 AIDR3				EQU		0x4221010C; 3
 AIDR2				EQU		0x42210108; 2
 AIDR1				EQU		0x42210104; 1
-AIDR0				EQU		0x42210100; 0  nejnizsi bit, tedy PA_0, pro cteni Bit-Banding
+AIDR0				EQU		0x42210100; 0
 
 ;--------------------------------------------------------------------------------
 GPIOA_ODR	 		EQU		0x4001080C ; output data registr
-;GPIOA_ODR	bits                         Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
-AODR15				EQU		0x422101BC; 15  nejvyssi bit, tedy PA_15, pro zapis Bit-Banding
+;GPIOA_ODR	bits
+AODR15				EQU		0x422101BC; 15
 AODR14				EQU		0x422101B8; 14
 AODR13				EQU		0x422101B4; 13
 AODR12				EQU		0x422101B0; 12
@@ -57,7 +54,7 @@ AODR4				EQU		0x42210190; 4
 AODR3				EQU		0x4221018C; 3
 AODR2				EQU		0x42210188; 2
 AODR1				EQU		0x42210184; 1
-AODR0				EQU		0x42210180; 0 nejnizsi bit, tedy PA_0, pro zapis Bit-Banding
+AODR0				EQU		0x42210180; 0
 
 ;--------------------------------------------------------------------------------
 GPIOA_BSRR	 		EQU		0x40010810
@@ -77,8 +74,8 @@ GPIOC_CRL			EQU		0x40011000
 GPIOC_CRH	 		EQU		0x40011004
 ;--------------------------------------------------------------------------------
 GPIOC_IDR	 		EQU		0x40011008 ; input data regist
-;GPIOC_IDR	bits                        Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
-CIDR15				EQU		0x4222013C; 15 nejvyssi bit, tedy PC_15, pro cteni Bit-Banding
+;GPIOC_IDR	bits
+CIDR15				EQU		0x4222013C; 15
 CIDR14				EQU		0x42220138; 14
 CIDR13				EQU		0x42220134; 13
 CIDR12				EQU		0x42220130; 12
@@ -93,12 +90,12 @@ CIDR4				EQU		0x42220110; 4
 CIDR3				EQU		0x4222010C; 3
 CIDR2				EQU		0x42220108; 2
 CIDR1				EQU		0x42220104; 1
-CIDR0				EQU		0x42220100; 0 nejnizsi bit, tedy PC_0, pro cteni Bit-Banding
+CIDR0				EQU		0x42220100; 0
 
 ;--------------------------------------------------------------------------------
 GPIOC_ODR	 		EQU		0x4001100C ; output data registr
-;GPIOC_ODR	bits                         Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
-CODR15				EQU		0x422201BC; 15 nejvyssi bit, tedy PC_15, pro zapis Bit-Banding
+;GPIOC_ODR	bits
+CODR15				EQU		0x422201BC; 15
 CODR14				EQU		0x422201B8; 14
 CODR13				EQU		0x422201B4; 13
 CODR12				EQU		0x422201B0; 12
@@ -113,7 +110,7 @@ CODR4				EQU		0x42220190; 4
 CODR3				EQU		0x4222018C; 3
 CODR2				EQU		0x42220188; 2
 CODR1				EQU		0x42220184; 1
-CODR0				EQU		0x42220180; 0 nejnizsi bit, tedy PC_0, pro zapis Bit-Banding
+CODR0				EQU		0x42220180; 0
 ;--------------------------------------------------------------------------------
 GPIOC_BSRR	 		EQU		0x40011010
 ;--------------------------------------------------------------------------------
@@ -133,8 +130,8 @@ GPIOB_CRL			EQU		0x40010C00
 GPIOB_CRH	 		EQU		0x40010C04
 ;--------------------------------------------------------------------------------
 GPIOB_IDR	 		EQU		0x40010C08 ; input data regist
-;GPIOB_IDR	bits                          Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
-BIDR15				EQU		0x4221813C; 15  nejvyssi bit, tedy PB_15, pro cteni Bit-Banding
+;GPIOB_IDR	bits
+BIDR15				EQU		0x4221813C; 15
 BIDR14				EQU		0x42218138; 14
 BIDR13				EQU		0x42218134; 13
 BIDR12				EQU		0x42218130; 12
@@ -149,12 +146,12 @@ BIDR4				EQU		0x42218110; 4
 BIDR3				EQU		0x4221810C; 3
 BIDR2				EQU		0x42218108; 2
 BIDR1				EQU		0x42218104; 1
-BIDR0				EQU		0x42218100; 0 nejnizsi bit, tedy PB_0, pro cteni Bit-Banding
+BIDR0				EQU		0x42218100; 0
 
 ;--------------------------------------------------------------------------------
 GPIOB_ODR	 		EQU		0x40010C0C ; output data registr
-;GPIOB_ODR	bits                        Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
-BODR15				EQU		0x422181BC; 15  nejvyssi bit, tedy PC_15, pro zapis Bit-Banding
+;GPIOB_ODR	bits
+BODR15				EQU		0x422181BC; 15
 BODR14				EQU		0x422181B8; 14
 BODR13				EQU		0x422181B4; 13
 BODR12				EQU		0x422181B0; 12
@@ -169,7 +166,7 @@ BODR4				EQU		0x42218190; 4
 BODR3				EQU		0x4221818C; 3
 BODR2				EQU		0x42218188; 2
 BODR1				EQU		0x42218184; 1
-BODR0				EQU		0x42218180; 0 nejnizsi bit, tedy PB_0, pro zapis Bit-Banding
+BODR0				EQU		0x42218180; 0
 ;--------------------------------------------------------------------------------
 GPIOB_BSRR	 		EQU		0x40010C10
 ;--------------------------------------------------------------------------------
@@ -185,7 +182,7 @@ GPIOB_LCKR	 		EQU		0x40010C18
 ;RCC Registers   
 ;--------------------------------------------------------------------------------
 RCC_CR		 		EQU		0x40021000; clock control registr
-;RCC_CR BIT                              Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;RCC_CR BIT
 PLLRDY				EQU		0x42420064; 25
 PLLON				EQU		0x42420060; 24
 CSSON				EQU		0x4242004C; 19
@@ -198,7 +195,7 @@ HSIRDY				EQU		0x42420004; 1
 HSION				EQU		0x42420000; 0
 ;--------------------------------------------------------------------------------
 RCC_CFGR			EQU		0x40021004; clock configuration registr
-;RCC_CFGR	bits                        Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;RCC_CFGR	bits
 MCO			 		EQU		0x424200E0; 24
 USBPRE				EQU		0x424200D8; 22
 PLLMUL			 	EQU		0x424200C8; 18
@@ -212,7 +209,7 @@ SWS				 	EQU		0x42420088; 2
 SW			 		EQU		0x42420080; 0
 ;--------------------------------------------------------------------------------
 RCC_CIR				EQU		0x40021008
-;RCC_CIR	 bits                       Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;RCC_CIR	 bits
 
 LSIRDYIE			EQU		0x42420120; 8
 CSSF				EQU		0x4242011C; 7
@@ -229,7 +226,7 @@ RCC_APB1RSTR 			EQU		0x40021010
 RCC_AHBENR 			EQU		0x40021014
 ;--------------------------------------------------------------------------------
 RCC_APB2ENR			EQU		0x40021018
-;RCC_APB2ENR	bits                     Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;RCC_APB2ENR	bits
 ADC3EN				EQU		0x4242033C; 15
 USRT1EN				EQU		0x42420338; 14
 TIM8EN				EQU		0x42420334; 13
@@ -247,7 +244,7 @@ IOPAEN				EQU		0x42420308; 2
 AFIOEN				EQU		0x42420300; 0
 ;--------------------------------------------------------------------------------
 RCC_APB1ENR  		EQU		0x4002101C
-;RCC_APB1ENR	bits                     Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;RCC_APB1ENR	bits
 DACEN				EQU		0x424203F4; 29
 PWREN				EQU		0x424203EC; 28
 BKPEN				EQU		0x424203E8; 27
@@ -282,7 +279,7 @@ RCC_CSR 		 	EQU		0x40021024
 ;AFIO Registers   
 ;--------------------------------------------------------------------------------
 AFIO_MAPR			EQU 	0x40010004
-;AFIO_MAPR	bits                         Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;AFIO_MAPR	bits
 SWJ_CFG				EQU		0x422000E0; 24
 ADC2_ETRGREG_REMAP	EQU		0x422000D0; 20
 ADC2_ETRGINJ_REMAP	EQU		0x422000CC; 19
@@ -359,7 +356,7 @@ TIM1_CR2			EQU		0x40012C04; CONTROL 2
 TIM1_SMCR			EQU		0x40012C08; SLAVE MODE CONTROL  
 ;--------------------------------------------------------------------------------
 TIM1_DIER			EQU		0x40012C0C;  
-;TIM1_DIER	bits                       Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;TIM1_DIER	bits
 TIE_T1				EQU		0x42258198; 6 bit Trigger Interrupt Enable
 CC4IE_T1			EQU		0x42258184; 4 bit Capture/Compare Interrupt Enable
 UIE_T1				EQU		0x42258180; 0 bit Update Interrupt Enable
@@ -404,7 +401,7 @@ TIM1_DMAR			EQU		0x40012C4C; DMA ADDRESS FOR FULL TRANSFER
 ;TIM2 Registers   
 ;--------------------------------------------------------------------------------
 TIM2_CR1			EQU		0x40000000; CONTROL 1 
-;TIM2_CR1 	bits                        Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;TIM2_CR1 	bits
 DIR_T2				EQU		0x42000010; 4 bit DIRECTION
 OPM_T2				EQU		0x4200000C; 3 bit ONE PULSE MODE
 URS_T2				EQU		0x42000008; 2 bit Update Request Source
@@ -465,7 +462,7 @@ TIM2_DMAR			EQU		0x4000004C; DMA ADDRESS FOR FULL TRANSFER
 ;TIM3 Registers   
 ;--------------------------------------------------------------------------------
 TIM3_CR1			EQU		0x40000400; CONTROL 1 
-;TIM3_CR1	bits                         Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;TIM3_CR1	bits
 DIR_T3				EQU		0x42008010; 4 bit DIRECTION
 OPM_T3				EQU		0x4200800C; 3 bit ONE PULSE MODE
 URS_T3				EQU		0x42008008; 2 bit Update Request Source
@@ -477,7 +474,7 @@ TIM3_CR2			EQU		0x40000404; CONTROL 2
 TIM3_SMCR			EQU		0x40000408; SLAVE MODE CONTROL
 ;--------------------------------------------------------------------------------
 TIM3_DIER			EQU		0x4000040C; 
-;TIM3_DIER	bits                         Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;TIM3_DIER	bits
 TIE_T3				EQU		0x42008198; 6 bit Trigger Interrupt Enable
 CC4IE_T3			EQU		0x42008190; 4 bit Capture/Compare Interrupt Enable
 CC3IE_T3			EQU		0x4200018C; 3 bit Capture/Compare Interrupt Enable
@@ -524,7 +521,7 @@ TIM3_DMAR			EQU		0x4000044C; DMA ADDRESS FOR FULL TRANSFER
 ;TIM4 Registers   
 ;--------------------------------------------------------------------------------
 TIM4_CR1			EQU		0x40000800; CONTROL 1 
-;TIM4_CR1	bits                        Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;TIM4_CR1	bits
 DIR_T4				EQU		0x42010010; 4 bit DIRECTION
 OPM_T4				EQU		0x4201000C; 3 bit ONE PULSE MODE
 URS_T4				EQU		0x42010008; 2 bit Update Request Source
@@ -536,7 +533,7 @@ TIM4_CR2			EQU		0x40000804; CONTROL 2
 TIM4_SMCR			EQU		0x40000808; SLAVE MODE CONTROL
 ;--------------------------------------------------------------------------------
 TIM4_DIER			EQU		0x4000080C; 
-;TIM4_DIER	bits                          Adresy jednotlivych bitu pro cteni/ prip. zapis metodou Bit- Banding
+;TIM4_DIER	bits
 TIE_T4				EQU		0x42010198; 6 bit Trigger Interrupt Enable
 CC4IE_T4			EQU		0x42010190; 4 bit Capture/Compare Interrupt Enable
 CC3IE_T4			EQU		0x4201018C; 3 bit Capture/Compare Interrupt Enable

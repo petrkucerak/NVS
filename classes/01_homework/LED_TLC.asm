@@ -60,7 +60,7 @@ MAIN									; MAIN navesti hlavni smycky programu
 
 				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
 										; ODR - Output Data Register
-				MOV		R3, #konst_all		; Kopie konstanty 'konst1' do R3
+				MOV		R7, #konst_all	; Kopie konstanty 'konst1' do R3
 				MOV		R6,	#konst_no
 				MOV		R4,#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
@@ -68,7 +68,7 @@ MAIN									; MAIN navesti hlavni smycky programu
 
 LOOP									; hlavni smycka programu, blikani LED a cteni stavu tlacitka
 				ADD		R4, R4, #1		; loop nahoru
-				MOV		R1, R3			; nahod hodnotu na blik obou
+				MOV		R1, R7			; nahod hodnotu na blik obou
 				
 				TST		R4, #0x80000
 				BEQ		SETLOOP
@@ -86,15 +86,15 @@ SETLOOP
 				MOV		R0, #50			; odchyt vzruchy po stisknuti
 				BL		DELAY
 				
-				CMP		R3, #konst_all	; je-li rovno soucasne hodnote, zmen na jinou
+				CMP		R7, #konst_all	; je-li rovno soucasne hodnote, zmen na jinou
 				BEQ		KONST
 				
-				MOV		R3, #konst_all
+				MOV		R7, #konst_all
 				MOV		R6, #konst_no
 				B		LOOP
 				
 KONST
-				MOV		R3, #konst_green
+				MOV		R7, #konst_green
 				MOV		R6, #konst_blue
 				B		LOOP
 				

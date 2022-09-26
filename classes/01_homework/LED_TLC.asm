@@ -75,8 +75,7 @@ LOOP									; hlavni smycka programu, blikani LED a cteni stavu tlacitka
 				BEQ		LOOP1			; Skok na navesti LOOP1, je-li vysledek predchozi operace roven 0
 										; tj. skok na LOOP1	v pripade nerovnosti bitu na dane pozici
 				MOV		R1, #0x0200		; Vlozeni hodnoty 0x200 do R1, konstanta pro nastaveni bitu 9
-
-LOOP1									; OBLUSHA TLACITKA		
+LOOP1			
 				STR		R1, [R2]		; Zapis hodnoty v R1 na adresu v R2, nastaveni/nulovani bitu
 										; na brane (LED se rozsviti/zhasne)
 

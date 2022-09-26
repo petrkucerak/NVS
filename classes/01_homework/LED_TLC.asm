@@ -60,43 +60,74 @@ MAIN									; MAIN navesti hlavni smycky programu
 
 				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
 										; ODR - Output Data Register
-				MOV		R7, #konst_all	; Kopie konstanty 'konst1' do R3
-				MOV		R6,	#konst_no
-				MOV		R4,#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
+				MOV		R7, #konst_all	; vychozi hodnota pro blik 1
+				MOV		R6,	#konst_no	; vychozi hodnota pro blik 2
+				MOV		R4,	#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
+				MOV		R3, #0			; Vytvor stavovy automat (citac z registru R3)
+										; 	STAVY
+										; 		0) - SOS, N_SOS
+										; 		1) - 0, SOS
+										; 		2) - SOS, 0
+										; 		3) - 1, 1
+										
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
 										; IDR - Input Data Register
 
-LOOP									; hlavni smycka programu, blikani LED a cteni stavu tlacitka
-				ADD		R4, R4, #1		; loop nahoru
-				MOV		R1, R7			; nahod hodnotu na blik obou
+LOOP									; hlavni smycka programu
 				
-				TST		R4, #0x80000
-				BEQ		SETLOOP
+				CMP		R3, #0
+				BEQ		STAGE_A
+				CMP		R3, #1
+				BEQ		STAGE_B
+				CMP		R3, #2
+				BEQ		STAGE_C
+				CMP		R3, #3
+				BEQ		STAGE_D
 				
-				MOV		R1, R6			; nahod hodnotu na zadny blik
-
-SETLOOP
-				STR		R1, [R2]		; propis blik
+BUTTON_CHECK
 				
-				; test tlacitka
-				LDR		R1, [R5]		; prekpiruj hodnoty z adresy na ktere je namapovane tlacitko
-				TST		R1, #0x1		; je-li rovno jedne, neni stisknute
+				
+				LDR		R1, [R5]
+				TST		R1, #0x1
 				BEQ		LOOP
 				
-				MOV		R0, #50			; odchyt vzruchy po stisknuti
+				MOV		R0, #50
 				BL		DELAY
 				
-				CMP		R7, #konst_all	; je-li rovno soucasne hodnote, zmen na jinou
-				BEQ		KONST
+				ADD		R3, R3, #0x1
+				CMP		R3, #4
+				BEQ		NORMALIZE
 				
-				MOV		R7, #konst_all
-				MOV		R6, #konst_no
 				B		LOOP
 				
-KONST
-				MOV		R7, #konst_green
-				MOV		R6, #konst_blue
+NORMALIZE
+				MOV		R3, #0
 				B		LOOP
+				
+STAGE_A
+				MOV		R1, #konst_all
+				STR		R1, [R2]
+				
+				B		BUTTON_CHECK
+				
+STAGE_B
+				MOV		R1, #konst_green
+				STR		R1, [R2]
+				
+				B		BUTTON_CHECK
+				
+STAGE_C
+				MOV		R1, #konst_blue
+				STR		R1, [R2]
+				
+				B		BUTTON_CHECK
+				
+STAGE_D
+				MOV		R1, #konst_no
+				STR		R1, [R2]
+				
+				B		BUTTON_CHECK
+				
 				
 			
 

@@ -64,17 +64,13 @@ MAIN									; MAIN navesti hlavni smycky programu
 				MOV		R6,	#konst_no	; vychozi hodnota pro blik 2
 				MOV		R4,	#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
 				MOV		R3, #0			; Vytvor stavovy automat (citac z registru R3)
-										; 	STAVY
-										; 		0) - SOS, N_SOS
-										; 		1) - 0, SOS
-										; 		2) - SOS, 0
-										; 		3) - 1, 1
-										
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
 										; IDR - Input Data Register
-
-LOOP									; hlavni smycka programu
+										
+LOOP			; hlavni smycka programu
+				ADD		R4, R4, #0x1	; inkrementace citace
 				
+				; FSM
 				CMP		R3, #0
 				BEQ		STAGE_A
 				CMP		R3, #1
@@ -84,49 +80,79 @@ LOOP									; hlavni smycka programu
 				CMP		R3, #3
 				BEQ		STAGE_D
 				
-BUTTON_CHECK
-				
-				
+BUTTON_CHECK	; OSETRENI TLACITKA
 				LDR		R1, [R5]
 				TST		R1, #0x1
 				BEQ		LOOP
 				
+				; osetreni zpetne vazby
 				MOV		R0, #50
 				BL		DELAY
 				
+				; inkrementace FSM
 				ADD		R3, R3, #0x1
 				CMP		R3, #4
 				BEQ		NORMALIZE
 				
 				B		LOOP
 				
-NORMALIZE
+				
+NORMALIZE		; pokud je stav vetsi nez 3, nastav zpatky nulu
 				MOV		R3, #0
 				B		LOOP
 				
-STAGE_A
-				MOV		R1, #konst_all
+				
+STAGE_A			; SOS x N SOS
+				MOV		R1, #konst_no
 				STR		R1, [R2]
 				
 				B		BUTTON_CHECK
 				
-STAGE_B
+				
+STAGE_B			; 0 x SOS
 				MOV		R1, #konst_green
 				STR		R1, [R2]
 				
 				B		BUTTON_CHECK
 				
-STAGE_C
+				
+STAGE_C			; SOS x 0
 				MOV		R1, #konst_blue
 				STR		R1, [R2]
 				
 				B		BUTTON_CHECK
 				
-STAGE_D
-				MOV		R1, #konst_no
+				
+STAGE_D			; 1 x 1
+				MOV		R1, #konst_all
 				STR		R1, [R2]
 				
 				B		BUTTON_CHECK
+
+				
+LED_GREEN_ON
+				MOV		R1 #konst_green
+				STR		R1, [R2]
+				
+				B		LOOP
+				
+LED_BLUE_ON
+				MOV		R1 #konst_blue
+				STR		R1, [R2]
+				
+				B		LOOP
+
+LED_ALL_ON
+				MOV		R1 #konst_all
+				STR		R1, [R2]
+				
+				B		LOOP
+				
+LED_ALL_OFF
+				MOV		R1 #konst_no
+				STR		R1, [R2]
+				
+				B		LOOP
 				
 				
 			

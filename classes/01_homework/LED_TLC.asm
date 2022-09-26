@@ -70,7 +70,7 @@ LOOP			; hlavni smycka programu
 				ADD		R4, R4, R6	; inkrementace citace
 				
 				MOV		R1, #konst_all
-				TST		R4, #0x800
+				TST		R4, #0x08000
 				BEQ		LOOP1
 				MOV		R1, #konst_no
 LOOP1

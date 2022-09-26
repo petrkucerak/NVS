@@ -24,9 +24,11 @@
 										; jsou zde definovany adresy pristupu do pameti (k registrum)
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++										
-konst1 EQU	0x80000 					; direktiva EQU priradi vyrazu 'konst1' hodnotu 0x80000 
-konst2 EQU	0x10000						; direktiva EQU priradi vyrazu 'konst2' hodnotu 0x10000 
-;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++										
+konst_all 	EQU	0x0300
+konst_green	EQU	0x0100
+konst_blue	EQU	0x0200
+konst_no	EQU	0x0
+;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 											
 		EXPORT	__main					; export navesti pouzivaneho v jinem souboru, zde konkretne
@@ -58,51 +60,45 @@ MAIN									; MAIN navesti hlavni smycky programu
 
 				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
 										; ODR - Output Data Register
-				MOV		R3, #konst1		; Kopie konstanty 'konst1' do R3
+				MOV		R3, #konst_all		; Kopie konstanty 'konst1' do R3
+				MOV		R6,	#konst_no
 				MOV		R4,#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
 										; IDR - Input Data Register
 
-LOOP									; hlavni smycka programu, blikani LED a cteni stavu tlacitka			
-
-				ADD		R4,R4,#1		; R4 = R4 + 1, inkrementace citace o 1
+LOOP									; hlavni smycka programu, blikani LED a cteni stavu tlacitka
+				ADD		R4, R4, #1		; loop nahoru
+				MOV		R1, R3			; nahod hodnotu na blik obou
 				
-				; Blikani LED, frekvence je dana registrem R3
-				MOV		R1, #0x0100		; Vlozeni hodnoty 0x100 do R1, konstanta pro nastaveni bitu 8 
-				TST		R4, R3			; Porovnani R4 a R3 => (R4 & R3) a nastaveni priznaku
-										; testuje se jestli je v R4 (citac) pozadovana hodnota
-										; tj. jeli nastaven urcity bit (hodnota v R3)
-				BEQ		LOOP1			; Skok na navesti LOOP1, je-li vysledek predchozi operace roven 0
-										; tj. skok na LOOP1	v pripade nerovnosti bitu na dane pozici
-				MOV		R1, #0x0200		; Vlozeni hodnoty 0x200 do R1, konstanta pro nastaveni bitu 9
-LOOP1			
-				STR		R1, [R2]		; Zapis hodnoty v R1 na adresu v R2, nastaveni/nulovani bitu
-										; na brane (LED se rozsviti/zhasne)
-
-				; Testovani stisku tlacitka
-				LDR		R1, [R5]		; Nacteni obsahu registru na adrese v R5 do R1, tj. cteni brany A
+				TST		R4, #0x80000
+				BEQ		SETLOOP
 				
-				TST		R1, #0x1		; Porovnani R1 a 1 => (R1 & 1) a nastaveni priznaku
-										; testuje se jestli je v R1 (brana A) pozadovana hodnota
-										; tj. jeli nastaven bit 0
-				BEQ		LOOP			; Skok na navesti LOOP, je-li vysledek predchozi operace roven 0
-										; tj. skok na LOOP pri nestisknutem tlacitku, jinak se pokracuje
+				MOV		R1, R6			; nahod hodnotu na zadny blik
 
-				; Prodleva pro osetreni zakmitu tlacitka
-				MOV		R0, #50			; Vlozeni hodnoty prodlevy do R0, tj. 50
-				BL		DELAY			; Volani rutiny prodlevy, R0 je vtupni parametr DELAY
-
-				; Zmena modu blikani LED, vlozeni jine konstanty frekvence blikani do R3
- 				TST		R3, #konst1		; Test puvodni hodnoty konstanty v R3, (R3 & 0x80000) nebo 
-										; (R3 & 0x10000) a nastaveni priznaku
-				BEQ		KONST			; Skok na navesti KONST pri R3 = konst2 (byla to puvodni
-										; hodnota frekvence tak ji zmenime aby se blikalo jinou
-										; frekvenci), jinak se pokracuje
-				MOV		R3, #konst2		; Vlozeni konstanty 0x10000 do R3, zmena frekvence
-				B		LOOP			; Skok na navesti LOOP pro opakovani smycky
+SETLOOP
+				STR		R1, [R2]		; propis blik
+				
+				; test tlacitka
+				LDR		R1, [R5]		; prekpiruj hodnoty z adresy na ktere je namapovane tlacitko
+				TST		R1, #0x1		; je-li rovno jedne, neni stisknute
+				BEQ		LOOP
+				
+				MOV		R0, #50			; odchyt vzruchy po stisknuti
+				BL		DELAY
+				
+				CMP		R3, #konst_all	; je-li rovno soucasne hodnote, zmen na jinou
+				BEQ		KONST
+				
+				MOV		R3, #konst_all
+				MOV		R6, #konst_no
+				B		LOOP
+				
 KONST
-				MOV		R3, #konst1		; Vlozeni konstanty 0x80000 do R3, zmena frekvence
-				B		LOOP			; Skok na navesti LOOP pro opakovani smycky
+				MOV		R3, #konst_green
+				MOV		R6, #konst_blue
+				B		LOOP
+				
+			
 
 
 ;***************************************************************************************************

@@ -62,6 +62,7 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; ODR - Output Data Register
 				MOV		R7, #konst_all	; vychozi hodnota pro blik 1
 				MOV		R6,	#konst_no	; vychozi hodnota pro blik 2
+				MOV		R8, #0			; vychozi hodnota pro vystup SOS
 				MOV		R4,	#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
 				MOV		R3, #0			; Vytvor stavovy automat (citac z registru R3)
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
@@ -70,7 +71,95 @@ MAIN									; MAIN navesti hlavni smycky programu
 LOOP			; hlavni smycka programu
 				ADD		R4, R4, #0x1	; inkrementace citace
 				
-				; FSM
+				CMP		R4, #0x0
+				BEQ		SET_OFF
+				
+				CMP		R4, #0x8000
+				BEQ		SET_ON
+				
+				CMP		R4, #0x10000
+				BEQ		SET_OFF
+				CMP		R4, #0x18000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0x20000
+				BEQ		SET_ON
+				
+				CMP		R4, #0x28000
+				BEQ		SET_OFF
+				CMP		R4, #0x30000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0x38000
+				BEQ		SET_ON
+				
+				CMP		R4, #0x40000
+				BEQ		SET_OFF
+				CMP		R4, #0x48000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0x50000
+				BEQ		SET_ON
+				CMP		R4, #0x58000
+				BEQ		SET_ON
+				CMP		R4, #0x60000
+				BEQ		SET_ON
+				
+				CMP		R4, #0x68000
+				BEQ		SET_OFF
+				CMP		R4, #0x70000
+				BEQ		SET_OFF
+				CMP		R4, #0x78000
+				
+				BEQ		SET_ON
+				CMP		R4, #0x80000
+				BEQ		SET_ON
+				CMP		R4, #0x88000
+				BEQ		SET_ON
+				
+				CMP		R4, #0x90000
+				BEQ		SET_OFF
+				CMP		R4, #0x98000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0xA0000
+				BEQ		SET_ON
+				CMP		R4, #0xA8000
+				BEQ		SET_ON
+				CMP		R4, #0xB0000
+				BEQ		SET_ON
+				
+				CMP		R4, #0xB8000
+				BEQ		SET_OFF
+				CMP		R4, #0xC0000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0xC8000
+				BEQ		SET_ON
+				
+				CMP		R4, #0xD0000
+				BEQ		SET_OFF
+				CMP		R4, #0xD8000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0xE0000
+				BEQ		SET_ON
+				
+				CMP		R4, #0xE8000
+				BEQ		SET_OFF
+				CMP		R4, #0xF0000
+				BEQ		SET_OFF
+				
+				CMP		R4, #0xF8000
+				BEQ		SET_ON
+				
+				CMP		R4, #0x100000
+				BEQ		SET_ALL_OFF
+				
+				CMP		R4, #0x120000
+				BEQ		NORMALIZE_R4
+
+FSM				; FSM
 				CMP		R3, #0
 				BEQ		STAGE_A
 				CMP		R3, #1
@@ -79,6 +168,21 @@ LOOP			; hlavni smycka programu
 				BEQ		STAGE_C
 				CMP		R3, #3
 				BEQ		STAGE_D
+
+SET_ON
+				MOV		R8, #0x1
+				B		FSM	
+SET_OFF			
+				MOV		R8, #0x0
+				B		FSM
+SET_ALL_OFF
+				MOV		R8, #0x2
+				B		FSM
+NORMALIZE_R4
+				MOV		R4, #0
+				B		FSM
+
+
 				
 BUTTON_CHECK	; OSETRENI TLACITKA
 				LDR		R1, [R5]
@@ -102,23 +206,44 @@ NORMALIZE		; pokud je stav vetsi nez 3, nastav zpatky nulu
 				B		LOOP
 				
 				
+				
+				
 STAGE_A			; SOS x N SOS
-				MOV		R1, #konst_no
-				STR		R1, [R2]
+				CMP		R8,	#0x1
+				BEQ		LED_GREEN_ON
+				
+				CMP		R8, #0x0
+				BEQ		LED_BLUE_ON
+				
+				CMP		R8, #0x2
+				BEQ		LED_ALL_OFF
 				
 				B		BUTTON_CHECK
 				
 				
+				
 STAGE_B			; 0 x SOS
-				MOV		R1, #konst_green
-				STR		R1, [R2]
+				CMP		R8, #0x1
+				BEQ		LED_BLUE_ON
+				
+				CMP		R8, #0x0
+				BEQ		LED_ALL_OFF
+				
+				CMP		R8, #0x2
+				BEQ		LED_ALL_OFF
 				
 				B		BUTTON_CHECK
 				
 				
 STAGE_C			; SOS x 0
-				MOV		R1, #konst_blue
-				STR		R1, [R2]
+				CMP		R8, #0x1
+				BEQ		LED_GREEN_ON
+				
+				CMP		R8, #0x0
+				BEQ		LED_ALL_OFF
+				
+				CMP		R8, #0x2
+				BEQ		LED_ALL_OFF
 				
 				B		BUTTON_CHECK
 				
@@ -130,29 +255,31 @@ STAGE_D			; 1 x 1
 				B		BUTTON_CHECK
 
 				
+				
+				
 LED_GREEN_ON
-				MOV		R1 #konst_green
+				MOV		R1, #konst_green
 				STR		R1, [R2]
 				
-				B		LOOP
+				B		BUTTON_CHECK
 				
 LED_BLUE_ON
-				MOV		R1 #konst_blue
+				MOV		R1, #konst_blue
 				STR		R1, [R2]
 				
-				B		LOOP
+				B		BUTTON_CHECK
 
 LED_ALL_ON
-				MOV		R1 #konst_all
+				MOV		R1, #konst_all
 				STR		R1, [R2]
 				
-				B		LOOP
+				B		BUTTON_CHECK
 				
 LED_ALL_OFF
-				MOV		R1 #konst_no
+				MOV		R1, #konst_no
 				STR		R1, [R2]
 				
-				B		LOOP
+				B		BUTTON_CHECK
 				
 				
 			

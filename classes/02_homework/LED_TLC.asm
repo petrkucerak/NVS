@@ -98,6 +98,15 @@ BUTTON_CHECK
 				BEQ		LOOP			; pokud neni stiskle, skoc zpet na LOOP
 				
 BUTTON_DELAY
+				; rozsviceni zeleneho svetla
+				MOV		R1, #konst_green
+				CMP		R6, #0x0		; neni-li stav v cekani, blikni obema svetly
+				BEQ		LIGHT_BOTH1
+				MOV		R1, #konst_all
+LIGHT_BOTH1
+				STR		R1, [R2]		; rozvist svetla
+				
+				; tlacitko
 				ADD		R4, R4, #0x1	; inkrementuj button counter
 				
 				MOV		R0, #50
@@ -106,6 +115,15 @@ BUTTON_DELAY
 				LDR		R1, [R5]		; nacti data z gate tlacitka
 				TST		R1, #0x1		; je-li rovno 1, neni tlacitko stiskle
 				BNE		BUTTON_DELAY	; je-li tlacitko stikle, vrat se na BUTTON_DELAY
+				
+				; zhasinani zeleneho svetla
+				MOV		R1, #konst_all
+				CMP		R6, #0x0
+				BEQ		LIGHT_BOTH2
+				MOV		R1, #konst_blue
+LIGHT_BOTH2				
+				STR		R1, [R2]
+				
 				
 				; zkontroluj delku stisku
 				CMP		R4, #0x002		; je-li hodnota vetsi nez TODO: nastav limit na delsi hodnotu

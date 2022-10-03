@@ -69,13 +69,39 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; 1 - kratka sekvence
 										; 2 - dlouha sekvence
 				MOV		R7, #0x0		; deadline
+				MOV		R8, #0x0
 	
 LOOP
 				ADD		R3, R3, #0x1	; inkrementuj counter
+				SUB		R8, R7, R3
 				
 FSM_CHECK
 				CMP		R6, #0x0		; je-li status rovny nule, vykonej stejnou vec jako by counter presahl deadline
 				BEQ		DEADLINE_PROCESS
+				
+FLASHING_WARNING
+				MOV		R1, #konst_no	; vynuluje
+				; prvni blik
+				CMP		R8, #0x100000
+				BHI		FLASHING_WARNING2
+				CMP		R8, #0x0D0000
+				BLS		FLASHING_WARNING2
+				B		LIGHT_SET
+
+FLASHING_WARNING2	; druhy blik
+				CMP		R8, #0x0A0000
+				BHI		FLASHING_WARNING3
+				CMP		R8, #0x080000
+				BLS		FLASHING_WARNING3
+				B		LIGHT_SET
+				
+FLASHING_WARNING3	; treti blik
+				CMP		R8, #0x050000
+				BHI		LIGHT_CHECK
+				CMP		R8, #0x020000
+				BLS		LIGHT_CHECK
+				
+				B		LIGHT_SET
 				
 				
 LIGHT_CHECK

@@ -108,19 +108,19 @@ BUTTON_DELAY
 				BNE		BUTTON_DELAY	; je-li tlacitko stikle, vrat se na BUTTON_DELAY
 				
 				; zkontroluj delku stisku
-				TST		R4, #0x1		; je-li hodnota vetsi nez TODO: nastav limit na delsi hodnotu
-				BEQ		SET_LONG_TIME
+				CMP		R4, #0x002		; je-li hodnota vetsi nez TODO: nastav limit na delsi hodnotu
+				BHI		SET_LONG_TIME
 
 SET_SHORT_TIME
 				MOV		R6, #0x1		; FSM - 1
 				MOV		R3, #0x0		; counter = 0
-				MOV		R7, #0x08000	; waiting value
+				MOV		R7, #0x400000		; waiting value
 				B		LOOP
 				
 SET_LONG_TIME
 				MOV		R6, #0x2		; FSM - 2
 				MOV		R3, #0x0		; counter = 0
-				MOV		R7, #0xF0000		; waiting value
+				MOV		R7, #0xF00000		; waiting value
 				B		LOOP
 				
 				

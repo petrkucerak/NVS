@@ -25,8 +25,8 @@
 
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++										
 konst_all 	EQU	0x0300
-konst_green	EQU	0x0100
-konst_blue	EQU	0x0200
+konst_blue	EQU	0x0100
+konst_green	EQU	0x0200
 konst_no	EQU	0x0
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -60,19 +60,68 @@ MAIN									; MAIN navesti hlavni smycky programu
 
 				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
 										; ODR - Output Data Register
-				MOV		R7, #konst_all	; vychozi hodnota pro blik 1
-				MOV		R6,	#konst_no	; vychozi hodnota pro blik 2
-				MOV		R8, #0			; vychozi hodnota pro vystup SOS
-				MOV		R4,	#0			; Vlozeni 0 do R4, nulovani citace (softwarový citac registr R4)
-				MOV		R3, #0			; Vytvor stavovy automat (citac z registru R3)
+				MOV		R3, #0x0		; counter
+				MOV		R4,	#0x0		; button counter
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
 										; IDR - Input Data Register
+				MOV		R6,	#0x0		; FSM
+										; 3 - cekani na stisk
+										; 1 - kratka sekvence
+										; 2 - dlouha sekvence
+				MOV		R7,	#0x0		; waiting value
 										
 LOOP			; hlavni smycka programu
+				ADD		R3, R3, #0x1	; increment a counter
 				
-				MOV		R3
+				CMP		R6,	#0x0		; pokud je v nulovem stavu, skoc na check tlacitka
+				BEQ		BUTTON_CHECK
 				
+				
+LIGHTING
+				MOV		R1, #konst_all
+				TST		R3, R7
+				BEQ		LIGHTING1
+				MOV		R1, #konst_no	; pokud presahlo cislo, proved ukoncovaci operace
+				MOV		R6, #0x0		; nastav FSM do stavu cekani
+				
+LIGHTING1
+				STR		R1, [R2]
+
+
+BUTTON_CHECK	; OSETRENI TLACITKA
+				MOV		R4, #0x0		; nuluj button counter
+				
+				LDR		R1, [R5]
+				TST		R1, #0x1
+				BEQ		LOOP			; pokud se nerovna, pojd zatky na loop
+				
+				
+BUTTON_DELAY
+				; osetreni zpetne vazby
+				ADD		R4, R4, #0x1	; inkrementuj button counter
+				
+				MOV		R0, #50
+				BL		DELAY
+				
+				LDR		R1, [R5]
+				TST		R1, #0x1
+				BNE		BUTTON_DELAY	; pokud se tlacitko stale macka, pojd znovu a inkrementuj hodnotu
+				
+				TST		R4, #0x1		; je-li hodnota vetsi nez ... nastav stavovy automat na danou hodnotu
+				BEQ		SET_LONG_TIME
+;SET_SHORT_TIME
+				MOV		R6, #0x1
+				MOV		R3, #0x0		; reset counter
+				MOV		R7, #0x080000	; set short a waiting value
 				B		LOOP
+				
+SET_LONG_TIME
+				MOV		R6, #0x2
+				MOV		R3, #0x0		; reset counter
+				MOV		R7, #0xF00000	; set long a waiting value
+				B		LOOP
+				
+				
 				
 				
 			

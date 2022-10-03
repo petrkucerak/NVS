@@ -60,66 +60,69 @@ MAIN									; MAIN navesti hlavni smycky programu
 
 				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
 										; ODR - Output Data Register
-				MOV		R3, #0x0		; counter
-				MOV		R4,	#0x0		; button counter
 				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
 										; IDR - Input Data Register
-				MOV		R6,	#0x0		; FSM
-										; 3 - cekani na stisk
+				MOV		R3, #0x0		; counter
+				MOV		R4, #0x0		; button counter
+				MOV		R6, #0x0		; FSM
+										; 0 - cekani na stisk
 										; 1 - kratka sekvence
 										; 2 - dlouha sekvence
-				MOV		R7,	#0x0		; waiting value
-										
-LOOP			; hlavni smycka programu
-				ADD		R3, R3, #0x1	; increment a counter
+				MOV		R7, #0x0		; deadline
+	
+LOOP
+				ADD		R3, R3, #0x1	; inkrementuj counter
 				
-				CMP		R6,	#0x0		; pokud je v nulovem stavu, skoc na check tlacitka
-				BEQ		BUTTON_CHECK
+FSM_CHECK
+				CMP		R6, #0x0		; je-li status rovny nule, vykonej stejnou vec jako by counter presahl deadline
+				BEQ		DEADLINE_PROCESS
 				
 				
-LIGHTING
-				MOV		R1, #konst_all
-				TST		R3, R7
-				BEQ		LIGHTING1
-				MOV		R1, #konst_no	; pokud presahlo cislo, proved ukoncovaci operace
-				MOV		R6, #0x0		; nastav FSM do stavu cekani
+LIGHT_CHECK
+				MOV		R1, #konst_blue
+				CMP		R3, R7
+				BNE		LIGHT_SET		; dokud se nerovnaji, svit
+DEADLINE_PROCESS						; je-li mensi
+				MOV		R1, #konst_no	; prestan svitit
+				MOV		R3, #0x0		; vubuluj counter
+				MOV		R6, #0x0		; nastav FSM na cekani na stisk
 				
-LIGHTING1
-				STR		R1, [R2]
+LIGHT_SET
+				STR		R1, [R2]		; propis hodnotu a rozvit nebo zhasni
+				
 
-
-BUTTON_CHECK	; OSETRENI TLACITKA
-				MOV		R4, #0x0		; nuluj button counter
-				
-				LDR		R1, [R5]
-				TST		R1, #0x1
-				BEQ		LOOP			; pokud se nerovna, pojd zatky na loop
-				
+BUTTON_CHECK
+				MOV		R4, #0x0		; vynuluj button counter
+				LDR		R1, [R5]		; nacti data z gate tlacitka
+				TST		R1, #0x1		; je-li rovno 1, neni stiskle
+				BEQ		LOOP			; pokud neni stiskle, skoc zpet na LOOP
 				
 BUTTON_DELAY
-				; osetreni zpetne vazby
 				ADD		R4, R4, #0x1	; inkrementuj button counter
 				
 				MOV		R0, #50
-				BL		DELAY
+				BL		DELAY			; pocekej, abys odchytil chveni
 				
-				LDR		R1, [R5]
-				TST		R1, #0x1
-				BNE		BUTTON_DELAY	; pokud se tlacitko stale macka, pojd znovu a inkrementuj hodnotu
+				LDR		R1, [R5]		; nacti data z gate tlacitka
+				TST		R1, #0x1		; je-li rovno 1, neni tlacitko stiskle
+				BNE		BUTTON_DELAY	; je-li tlacitko stikle, vrat se na BUTTON_DELAY
 				
-				TST		R4, #0x1		; je-li hodnota vetsi nez ... nastav stavovy automat na danou hodnotu
+				; zkontroluj delku stisku
+				TST		R4, #0x1		; je-li hodnota vetsi nez TODO: nastav limit na delsi hodnotu
 				BEQ		SET_LONG_TIME
-;SET_SHORT_TIME
-				MOV		R6, #0x1
-				MOV		R3, #0x0		; reset counter
-				MOV		R7, #0x080000	; set short a waiting value
+
+SET_SHORT_TIME
+				MOV		R6, #0x1		; FSM - 1
+				MOV		R3, #0x0		; counter = 0
+				MOV		R7, #0x08000	; waiting value
 				B		LOOP
 				
 SET_LONG_TIME
-				MOV		R6, #0x2
-				MOV		R3, #0x0		; reset counter
-				MOV		R7, #0xF00000	; set long a waiting value
+				MOV		R6, #0x2		; FSM - 2
+				MOV		R3, #0x0		; counter = 0
+				MOV		R7, #0xF0000		; waiting value
 				B		LOOP
+				
 				
 				
 				

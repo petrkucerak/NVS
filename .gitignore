@@ -47,7 +47,7 @@
 
 # Debugger files
 # define exception below if needed
-*.ini
+#*.ini
 
 # Other files
 *.build_log.htm

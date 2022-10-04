@@ -80,7 +80,7 @@ FSM_CHECK
 				BEQ		DEADLINE_PROCESS
 				
 FLASHING_WARNING
-				MOV		R1, #konst_no	; vynuluje
+				MOV		R1, #konst_green	; vynuluje
 				; prvni blik
 				CMP		R8, #0x100000
 				BHI		FLASHING_WARNING2
@@ -105,12 +105,12 @@ FLASHING_WARNING3	; treti blik
 				
 				
 LIGHT_CHECK
-				MOV		R1, #konst_blue
+				MOV		R1, #konst_all
 				CMP		R3, R7
 				BNE		LIGHT_SET		; dokud se nerovnaji, svit
 DEADLINE_PROCESS						; je-li mensi
 				MOV		R1, #konst_no	; prestan svitit
-				MOV		R3, #0x0		; vubuluj counter
+				MOV		R3, #0x0		; vunuluj counter
 				MOV		R6, #0x0		; nastav FSM na cekani na stisk
 				
 LIGHT_SET

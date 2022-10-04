@@ -205,7 +205,7 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>107</TopLine>
+      <TopLine>108</TopLine>
       <CurrentLine>118</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\STM32F10x.s</PathWithFileName>
@@ -222,7 +222,7 @@
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
       <TopLine>73</TopLine>
-      <CurrentLine>77</CurrentLine>
+      <CurrentLine>74</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\LED_TLC.asm</PathWithFileName>
       <FilenameWithoutPath>LED_TLC.asm</FilenameWithoutPath>

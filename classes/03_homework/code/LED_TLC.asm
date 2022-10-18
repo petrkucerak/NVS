@@ -238,10 +238,18 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
  
 ;**************************************************************************************************
 ;* Jmeno funkce		: GPIO_CNF
-;* Popis			: Konfigurace brany A a C
+;* Popis			: Konfigurace brany A, B a C
 ;* Vstup			: Zadny
 ;* Vystup			: Zadny
-;* Komentar			: Nastaveni PC08 a PC09 jako vystup (10MHz), PA0 jako vstup push-pull	
+;* Komentar			: Nastaveni PC08 a PC09 jako vystup (10MHz), PA0 jako vstup push-pull
+;					: - PC08 - blue
+;					: - PC09 - green
+;					: - PA0 - blue button
+;					: - PB05 - out|RESET
+;					: - PB06 - out|CLK
+;					: - PB07 - out|DATA
+;					: - PB08 - out|LEFT LIGHT
+;					: - PB09 - out|RIGHT LIGHT
 ;**************************************************************************************************
 GPIO_CNF								; Navesti zacatku podprogramu
 				LDR		R2, =0xFF		; Konstanta pro nulovani nastaveni bitu 8, 9	

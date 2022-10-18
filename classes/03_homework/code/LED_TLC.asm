@@ -242,14 +242,20 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 ;* Vstup			: Zadny
 ;* Vystup			: Zadny
 ;* Komentar			: Nastaveni PC08 a PC09 jako vystup (10MHz), PA0 jako vstup push-pull
-;					: - PC08 - blue
-;					: - PC09 - green
-;					: - PA0 - blue button
-;					: - PB05 - out|RESET
-;					: - PB06 - out|CLK
-;					: - PB07 - out|DATA
-;					: - PB08 - out|LEFT LIGHT
-;					: - PB09 - out|RIGHT LIGHT
+;					: A GATE
+;					: - PA0: blue button
+;					: - PA11: in|OK
+;					: B GATE
+;					: - PB05: out|RESET
+;					: - PB06: out|CLK
+;					: - PB07: out|DATA
+;					: - PB08: out|LEFT LIGHT
+;					: - PB09: out|RIGHT LIGHT
+;					: C GATE
+;					: - PC06: in|UP
+;					: - PC07: in|DOWN
+;					: - PC08: blue
+;					: - PC09: green
 ;**************************************************************************************************
 GPIO_CNF								; Navesti zacatku podprogramu
 				LDR		R2, =0xFF		; Konstanta pro nulovani nastaveni bitu 8, 9	

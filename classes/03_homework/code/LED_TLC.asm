@@ -242,32 +242,28 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 ;* Vstup			: Zadny
 ;* Vystup			: Zadny
 ;* Komentar			: Nastaveni PC08 a PC09 jako vystup (10MHz), PA0 jako vstup push-pull
-;					: A GATE
+;					: A GATE - (GPIOA_CRL)
 ;					: - PA0: blue button
+;					: A GATE - (GPIOA_CRH)
 ;					: - PA11: in|OK
-;					: B GATE
+
+;					: B GATE - (GPIOB_CRL)
 ;					: - PB05: out|RESET
 ;					: - PB06: out|CLK
 ;					: - PB07: out|DATA
+;					: B GATE - (GPIOB_CRH)
 ;					: - PB08: out|LEFT LIGHT
 ;					: - PB09: out|RIGHT LIGHT
-;					: C GATE
+
+;					: C GATE (GPIOC_CRL)
 ;					: - PC06: in|UP
 ;					: - PC07: in|DOWN
+;					: C GATE (GPIOC_CRH)
 ;					: - PC08: blue
 ;					: - PC09: green
 ;**************************************************************************************************
 GPIO_CNF								; Navesti zacatku podprogramu
-				LDR		R2, =0xFF		; Konstanta pro nulovani nastaveni bitu 8, 9	
-				LDR		R0, =GPIOC_CRH	; Kopie adresy GPIOC_CRH (Port Configuration Register High)
-										; do R0, GPIOC_CRH je v souboru INI.S	
-				LDR		R1, [R0]		; Nacteni hodnoty z adresy v R0 do R1 
-				BIC		R1, R1, R2 		; Nulovani bitu v R2 
-				MOV		R2, #0x11		; Vlozeni 1 do R2
-				ORR		R1, R1, R2		; maskovani, bit 8, 9 nastven jako vystup push-pull v modu 1 (10MHz)
-				STR		R1, [R0]		; Ulozeni konfigurace PCO9 a PC09
-
-				LDR		R2, =0xF		; Konstanta pro nulovani nastaveni bitu 0	
+Gate_A_LOW		LDR		R2, =0xF		; Konstanta pro nulovani nastaveni bitu 0	
 				LDR		R0, =GPIOA_CRL	; Kopie adresy GPIOA_CRL (Port Configuration Register Low)
 										; do R0, GPIOA_CRL je v souboru INI.S	
 				LDR		R1, [R0]		; Nacteni hodnoty z adresy v R0 do R1 
@@ -275,6 +271,49 @@ GPIO_CNF								; Navesti zacatku podprogramu
 				MOV		R2, #0x8		; Vlozeni 1 do R2
 				ORR		R1, R1, R2		; maskovani, bit 0 nastven jako push-pull vstup
 				STR		R1, [R0]		; Ulozeni konfigurace PAO0
+				
+Gate_A_HIGH		LDR		R2, =0xF000
+				LDR		R0, =GPIOA_CRH
+				LDR		R1, [R0]
+				BIC		R1, R1, R2
+				MOV		R2, #0x8000
+				ORR		R1, R1, R2
+				STR		R1, [R0]
+				
+Gate_B_LOW		LDR		R2, =0xFFF00000
+				LDR		R0, =GPIOB_CRL
+				LDR		R1, [R0]
+				BIC		R1, R1, R2
+				MOV		R2, #0x1100000
+				ORR		R1, R1, R2
+				MOV		R2, #0x10000000
+				ORR		R1, R1, R2
+				STR		R1, [R0]
+				
+Gate_B_HIGH		LDR		R2, =0xFF
+				LDR		R0, =GPIOB_CRH
+				LDR		R1, [R0]
+				BIC		R1, R1, R2
+				MOV		R2, #0x11
+				ORR		R1, R1, R2
+				STR		R1, [R0]
+				
+Gate_C_LOW		LDR		R2, =0xFF000000
+				LDR		R0, =GPIOC_CRL
+				LDR		R1, [R0]
+				BIC		R1, R1, R2
+				MOV		R2, #0x44000000
+				ORR		R1, R1, R2
+				STR		R1, [R0]
+				
+Gate_C_HIGH		LDR		R2, =0xFF		; Konstanta pro nulovani nastaveni bitu 8, 9	
+				LDR		R0, =GPIOC_CRH	; Kopie adresy GPIOC_CRH (Port Configuration Register High)
+										; do R0, GPIOC_CRH je v souboru INI.S	
+				LDR		R1, [R0]		; Nacteni hodnoty z adresy v R0 do R1 
+				BIC		R1, R1, R2 		; Nulovani bitu v R2 
+				MOV		R2, #0x11		; Vlozeni 1 do R2
+				ORR		R1, R1, R2		; maskovani, bit 8, 9 nastven jako vystup push-pull v modu 1 (10MHz)
+				STR		R1, [R0]		; Ulozeni konfigurace PCO9 a PC09
 
 				BX		LR				; Navrat z podprogramu, skok na adresu v LR
 

@@ -57,6 +57,18 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; byt v obsluze podprogramu tato instrukce jiz pouzita, nebot
 										; by doslo k prepsani LR a ztrate navratove adresy ->
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
+TEST_IO										
+				LDR		R2, =GPIOB_ODR
+				;reset
+				MOV		R1, #0x3C0
+				STR		R1, [R2]
+			
+				
+				B		TEST_IO
+				
+				
+
+MAIN_PROCESS
 
 				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
 										; ODR - Output Data Register

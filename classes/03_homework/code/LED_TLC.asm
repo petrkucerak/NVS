@@ -28,6 +28,19 @@ konst_all 	EQU	0x0300
 konst_blue	EQU	0x0100
 konst_green	EQU	0x0200
 konst_no	EQU	0x0
+	
+SEG_A EQU 2_00001000 ; na výst. D
+SEG_B EQU 2_00010000 ; na výst. E
+SEG_C EQU 2_01000000 ; na výst. G
+SEG_D EQU 2_10000000
+SEG_E EQU 2_00000010
+SEG_F EQU 2_00000100
+SEG_G EQU 2_00100000
+SEG_DP EQU 2_00000001
+; výstup Qx hgfedcba
+
+
+
 ;++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 											
@@ -60,10 +73,59 @@ MAIN									; MAIN navesti hlavni smycky programu
 TEST_IO										
 				LDR		R2, =GPIOB_ODR
 				;reset
-				MOV		R1, #0x3C0
+				MOV		R1, #2_1111100000
 				STR		R1, [R2]
-			
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
 				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1101100000
+				STR		R1, [R2]
+				MOV		R1, #2_1100100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1101100000
+				STR		R1, [R2]
+				MOV		R1, #2_1100100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+				MOV		R1, #2_1111100000
+				STR		R1, [R2]
+				MOV		R1, #2_1110100000
+				STR		R1, [R2]
+				
+TEST			
+				B		TEST
+
 				B		TEST_IO
 				
 				

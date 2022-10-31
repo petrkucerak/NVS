@@ -74,6 +74,12 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
 										
 				MOV		R7, #4			; vychozi hodnota
+				MOV		R8, #2			; mode: 2 - setting, 3 -executed
+TERMINATE_MODE	
+				CMP		R8, #3
+				BEQ		RUN_MODE
+;; SETTING MODE
+;; ==============================================
 CATCH_NUM
 				MOV		R3, #0x0		; delka zmacknuti counter
 
@@ -137,10 +143,35 @@ OK_BUTTON_CHECK
 				CMP		R1, #2_100000000000
 				BNE		DISPLAYING
 				MOV		R0, #50
-				B		MAIN_PROCESS
+				BL		DELAY
 				
-				
+				MOV		R8, #3
+				B		DISPLAYING
+;; ==============================================
+RUN_MODE
 
+OK_BUTTON_CHECK_RUN
+				LDR		R0, =GPIOA_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_11111111
+				BIC		R1, R1, #2_1111011100000000
+				CMP		R1, #2_100000000000
+				BNE		SET_LIGHT_TEST
+				MOV		R0, #50
+				BL		DELAY
+				
+				MOV		R8, #2
+				B		SET_LIGHT_TEST
+				
+SET_LIGHT_TEST
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_blue
+				STR		R1, [R2]
+				
+				B		DISPLAYING
+				
+				
+;; ==============================================
 DISPLAYING
 				
 				MOV		R6, R7
@@ -350,120 +381,7 @@ CONTINUE_D
 				MOV		R0, #1
 				BL		DELAY			; pocekej, abys odchytil chveni
 
-				B		CATCH_NUM
-
-;; ==============================================
-
-MAIN_PROCESS
-
-				LDR		R2, =GPIOC_ODR	; Kopie adresy brany C ODR do R2, GPIOC_ODR je v souboru INI.S			
-										; ODR - Output Data Register
-				LDR		R5, =GPIOA_IDR 	; Kopie adresy brany A IDR do R5, GPIOA_IDR je v souboru INI.S			
-										; IDR - Input Data Register
-				MOV		R3, #0x0		; counter
-				MOV		R4, #0x0		; button counter
-				MOV		R6, #0x0		; FSM
-										; 0 - cekani na stisk
-										; 1 - kratka sekvence
-										; 2 - dlouha sekvence
-				MOV		R7, #0x0		; deadline
-				MOV		R8, #0x0
-	
-LOOP
-				ADD		R3, R3, #0x1	; inkrementuj counter
-				SUB		R8, R7, R3
-				
-FSM_CHECK
-				CMP		R6, #0x0		; je-li status rovny nule, vykonej stejnou vec jako by counter presahl deadline
-				BEQ		DEADLINE_PROCESS
-				
-FLASHING_WARNING
-				MOV		R1, #konst_green	; vynuluje
-				; prvni blik
-				CMP		R8, #0x100000
-				BHI		FLASHING_WARNING2
-				CMP		R8, #0x0D0000
-				BLS		FLASHING_WARNING2
-				B		LIGHT_SET
-
-FLASHING_WARNING2	; druhy blik
-				CMP		R8, #0x0A0000
-				BHI		FLASHING_WARNING3
-				CMP		R8, #0x080000
-				BLS		FLASHING_WARNING3
-				B		LIGHT_SET
-				
-FLASHING_WARNING3	; treti blik
-				CMP		R8, #0x050000
-				BHI		LIGHT_CHECK
-				CMP		R8, #0x020000
-				BLS		LIGHT_CHECK
-				
-				B		LIGHT_SET
-				
-				
-LIGHT_CHECK
-				MOV		R1, #konst_all
-				CMP		R3, R7
-				BNE		LIGHT_SET		; dokud se nerovnaji, svit
-DEADLINE_PROCESS						; je-li mensi
-				MOV		R1, #konst_no	; prestan svitit
-				MOV		R3, #0x0		; vunuluj counter
-				MOV		R6, #0x0		; nastav FSM na cekani na stisk
-				
-LIGHT_SET
-				STR		R1, [R2]		; propis hodnotu a rozvit nebo zhasni
-				
-
-BUTTON_CHECK
-				MOV		R4, #0x0		; vynuluj button counter
-				LDR		R1, [R5]		; nacti data z gate tlacitka
-				TST		R1, #0x1		; je-li rovno 1, neni stiskle
-				BEQ		LOOP			; pokud neni stiskle, skoc zpet na LOOP
-				
-BUTTON_DELAY
-				; rozsviceni zeleneho svetla
-				MOV		R1, #konst_green
-				CMP		R6, #0x0		; neni-li stav v cekani, blikni obema svetly
-				BEQ		LIGHT_BOTH1
-				MOV		R1, #konst_all
-LIGHT_BOTH1
-				STR		R1, [R2]		; rozvist svetla
-				
-				; tlacitko
-				ADD		R4, R4, #0x1	; inkrementuj button counter
-				
-				MOV		R0, #50
-				BL		DELAY			; pocekej, abys odchytil chveni
-				
-				LDR		R1, [R5]		; nacti data z gate tlacitka
-				TST		R1, #0x1		; je-li rovno 1, neni tlacitko stiskle
-				BNE		BUTTON_DELAY	; je-li tlacitko stikle, vrat se na BUTTON_DELAY
-				
-				; zhasinani zeleneho svetla
-				MOV		R1, #konst_all
-				CMP		R6, #0x0
-				BEQ		LIGHT_BOTH2
-				MOV		R1, #konst_blue
-LIGHT_BOTH2				
-				STR		R1, [R2]
-				
-				
-				; zkontroluj delku stisku
-				CMP		R4, #0x002		; je-li hodnota vetsi nez TODO: nastav limit na delsi hodnotu
-				BHI		SET_LONG_TIME
-
-SET_SHORT_TIME
-				MOV		R6, #0x1		; FSM - 1
-				MOV		R3, #0x0		; counter = 0
-				MOV		R7, #0x400000		; waiting value
-				B		LOOP
-				
-SET_LONG_TIME
-				MOV		R6, #0x2		; FSM - 2
-				MOV		R3, #0x0		; counter = 0
-				MOV		R7, #0xF00000		; waiting value
-				B		LOOP				
+				B		TERMINATE_MODE
 			
 
 

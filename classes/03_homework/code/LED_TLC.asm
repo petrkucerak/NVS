@@ -76,69 +76,68 @@ MAIN									; MAIN navesti hlavni smycky programu
 				MOV		R7, #4			; vychozi hodnota
 CATCH_NUM
 
-				LDR		R0, =GPIOC_IDR	; load input address
-				MOV		R3, #0x0		; button counter
-				
-PLUS_BUTTON_CECK
+PLUS_BUTTON_CHECK
+				LDR		R0, =GPIOC_IDR
 				LDR		R1, [R0]
 				BIC		R1, R1, #2_10111111
-				TST		R1, #2_01000000		; je-li rovno 1 neni stiskle
-				BEQ		MINUS_BUTTON_CECK
-				ADD		R3, R3, #0x1
-				MOV		R0, #1
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_01000000
+				BNE		MINUS_BUTTON_CHECK
+				
+				MOV		R0, #30
 				BL		DELAY
+				
+				ADD		R7, R7, #0x1
+				
+				
+MINUS_BUTTON_CHECK
+				LDR		R0, =GPIOC_IDR
 				LDR		R1, [R0]
-				BIC		R1, R1, #2_10111111
-				TST		R1, #2_01000000
-				BNE		PLUS_BUTTON_CECK
+				BIC		R1, R1, #2_01111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_10000000
+				BNE		OK_BUTTON_CHECK
 				
-				CMP		R3, #0x1
-				BEQ		PLUS1
-				ADD		R7, R7, #0xA
-				B		DISPLAYING
+				MOV		R0, #30
+				BL		DELAY
 				
-PLUS1			ADD		R7, R7, #0x1
-				B		DISPLAYING
-
-MINUS_BUTTON_CECK
-
+				SUB		R7, R7, #0x1
 				
-OK_BUTTON_CECK
-				
-				
+OK_BUTTON_CHECK
 
 DISPLAYING
+				
 				MOV		R6, R7
 NUMEBR_SET_SECTION_T
 
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_0
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_1
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_2
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_3
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_4
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_5
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_6
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_7
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_8
 				SUB		R6, R6, #10
-				CMP		R6, #10
+				CMP		R6, #9
 				BLS		SET_T_9
 				
 SET_T_0			
@@ -565,7 +564,7 @@ Gate_C_LOW		LDR		R2, =0xFF000000
 				LDR		R0, =GPIOC_CRL
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x44000000
+				MOV		R2, #0x88000000
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				

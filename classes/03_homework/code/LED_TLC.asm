@@ -29,14 +29,16 @@ konst_blue	EQU	0x0100
 konst_green	EQU	0x0200
 konst_no	EQU	0x0
 	
-SEG_A EQU 2_00001000 ; na výst. D
-SEG_B EQU 2_00010000 ; na výst. E
-SEG_C EQU 2_01000000 ; na výst. G
-SEG_D EQU 2_10000000
-SEG_E EQU 2_00000010
-SEG_F EQU 2_00000100
-SEG_G EQU 2_00100000
-SEG_DP EQU 2_00000001
+NUM_0		EQU	2_11111100
+NUM_1		EQU	2_01100000
+NUM_2		EQU	2_11011010
+NUM_3		EQU	2_11110010
+NUM_4		EQU	2_01100110
+NUM_5		EQU	2_10110110
+NUM_6		EQU	2_10111110
+NUM_7		EQU	2_11100000
+NUM_8		EQU	2_11111110
+NUM_9		EQU	2_11110110
 ; výstup Qx hgfedcba
 
 
@@ -70,64 +72,50 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; byt v obsluze podprogramu tato instrukce jiz pouzita, nebot
 										; by doslo k prepsani LR a ztrate navratove adresy ->
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
-TEST_IO										
-				LDR		R2, =GPIOB_ODR
-				;reset
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
+PREPROCESS										
+				LDR		R0, =GPIOB_ODR	; nacteni adres bran
+				MOV		R3, #0x0		; definice counteru
+				MOV		R1, #2_1111100000	; nastaveni pocatecni hodnoty
+				STR		R1, [R0]		; nahrani pocatecni hodnoty
 				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
+				MOV		R4, #:NOT:NUM_9	; hodnota majici se nahrat
 				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
 				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
+LOADING_CIRCLE
 				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
+				LDR		R2, =2_0011000000	; nastaveni masky pro nulovani
+				LDR		R1, [R0]
+				BIC		R1, R1, R2			; vynuluj dane bity dle masky
 				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
+				MOV		R5, #0x0
+				AND		R5, R4, #0x1 		; vyanduj s maskou
+				MOV		R2, #2_0010000000	; nahod jednicku
+				CMP		R5, 0x1				; je li po vmaskovani jednicka, preskoc nasledujici instrukci
+				BEQ		HOP1			
+				MOV		R2, #2_0000000000	; nahod nulu
+HOP1			
+				ROR		R4, R4, #0x1		; rotuj hodnotu
+				ORR		R1, R1, R2
+				STR		R1, [R0]
 				
-				MOV		R1, #2_1101100000
-				STR		R1, [R2]
-				MOV		R1, #2_1100100000
-				STR		R1, [R2]
+				; aktivuj nabeznou hranu
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_0001000000
+				ORR		R1, R1, #2_0001000000
+				STR		R1, [R0]
+
+
+				; compoare
+				CMP		R3, #0x7
+				BEQ		CONTINUE
+				ADD		R3, R3, #0x1	; incease a value of loading pointer
+				B		LOADING_CIRCLE
 				
-				MOV		R1, #2_1101100000
-				STR		R1, [R2]
-				MOV		R1, #2_1100100000
-				STR		R1, [R2]
-				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
-				
-				MOV		R1, #2_1111100000
-				STR		R1, [R2]
-				MOV		R1, #2_1110100000
-				STR		R1, [R2]
+CONTINUE				
 				
 TEST			
 				B		TEST
 
-				B		TEST_IO
-				
 				
 
 MAIN_PROCESS

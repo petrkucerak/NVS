@@ -72,16 +72,84 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; byt v obsluze podprogramu tato instrukce jiz pouzita, nebot
 										; by doslo k prepsani LR a ztrate navratove adresy ->
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
-PREPROCESS										
+CATCH_NUM
+				MOV		R7, #47
+				MOV		R6, R7
+
+
+NUMEBR_SET_SECTION_T
+
+				CMP		R6, #10
+				BLS		SET_T_0
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_1
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_2
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_3
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_4
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_5
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_6
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_7
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_8
+				SUB		R6, R6, #10
+				CMP		R6, #10
+				BLS		SET_T_9
+				
+SET_T_0			
+				MOV		R4, #:NOT:NUM_0	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_1			
+				MOV		R4, #:NOT:NUM_1	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_2			
+				MOV		R4, #:NOT:NUM_2	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_3			
+				MOV		R4, #:NOT:NUM_3	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_4			
+				MOV		R4, #:NOT:NUM_4	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_5			
+				MOV		R4, #:NOT:NUM_5	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_6			
+				MOV		R4, #:NOT:NUM_6	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_7			
+				MOV		R4, #:NOT:NUM_7	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_8			
+				MOV		R4, #:NOT:NUM_8	; hodnota majici se nahrat
+				B		PREPROCESS_T
+SET_T_9			
+				MOV		R4, #:NOT:NUM_9	; hodnota majici se nahrat
+				B		PREPROCESS_T
+
+
+
+PREPROCESS_T									
 				LDR		R0, =GPIOB_ODR	; nacteni adres bran
 				MOV		R3, #0x0		; definice counteru
-				MOV		R1, #2_1111100000	; nastaveni pocatecni hodnoty
+				MOV		R1, #2_0111100000	; nastaveni pocatecni hodnoty
 				STR		R1, [R0]		; nahrani pocatecni hodnoty
 				
-				MOV		R4, #:NOT:NUM_9	; hodnota majici se nahrat
 				
-				
-LOADING_CIRCLE
+LOADING_CIRCLE_T
 				
 				LDR		R2, =2_0011000000	; nastaveni masky pro nulovani
 				LDR		R1, [R0]
@@ -91,9 +159,9 @@ LOADING_CIRCLE
 				AND		R5, R4, #0x1 		; vyanduj s maskou
 				MOV		R2, #2_0010000000	; nahod jednicku
 				CMP		R5, 0x1				; je li po vmaskovani jednicka, preskoc nasledujici instrukci
-				BEQ		HOP1			
+				BEQ		HOP1_T		
 				MOV		R2, #2_0000000000	; nahod nulu
-HOP1			
+HOP1_T		
 				ROR		R4, R4, #0x1		; rotuj hodnotu
 				ORR		R1, R1, R2
 				STR		R1, [R0]
@@ -107,14 +175,115 @@ HOP1
 
 				; compoare
 				CMP		R3, #0x7
-				BEQ		CONTINUE
+				BEQ		CONTINUE_T
 				ADD		R3, R3, #0x1	; incease a value of loading pointer
-				B		LOADING_CIRCLE
+				B		LOADING_CIRCLE_T
 				
-CONTINUE				
+CONTINUE_T			
+				MOV		R0, #1
+				BL		DELAY			; pocekej, abys odchytil chveni
 				
-TEST			
-				B		TEST
+
+				
+				
+NUMEBR_SET_SECTION_D
+
+				CMP		R6, #0
+				BEQ		SET_D_0
+				CMP		R6, #1
+				BEQ		SET_D_1
+				CMP		R6, #2
+				BEQ		SET_D_2
+				CMP		R6, #3
+				BEQ		SET_D_3
+				CMP		R6, #4
+				BEQ		SET_D_4
+				CMP		R6, #5
+				BEQ		SET_D_5
+				CMP		R6, #6
+				BEQ		SET_D_6
+				CMP		R6, #7
+				BEQ		SET_D_7
+				CMP		R6, #8
+				BEQ		SET_D_8
+				CMP		R6, #9
+				BEQ		SET_D_9
+				
+SET_D_0			
+				MOV		R4, #:NOT:NUM_0	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_1			
+				MOV		R4, #:NOT:NUM_1	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_2			
+				MOV		R4, #:NOT:NUM_2	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_3			
+				MOV		R4, #:NOT:NUM_3	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_4			
+				MOV		R4, #:NOT:NUM_4	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_5			
+				MOV		R4, #:NOT:NUM_5	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_6			
+				MOV		R4, #:NOT:NUM_6	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_7			
+				MOV		R4, #:NOT:NUM_7	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_8			
+				MOV		R4, #:NOT:NUM_8	; hodnota majici se nahrat
+				B		PREPROCESS_D
+SET_D_9			
+				MOV		R4, #:NOT:NUM_9	; hodnota majici se nahrat
+				B		PREPROCESS_D
+
+
+
+PREPROCESS_D										
+				LDR		R0, =GPIOB_ODR	; nacteni adres bran
+				MOV		R3, #0x0		; definice counteru
+				MOV		R1, #2_1011100000	; nastaveni pocatecni hodnoty
+				STR		R1, [R0]		; nahrani pocatecni hodnoty
+				
+				
+LOADING_CIRCLE_D
+				
+				LDR		R2, =2_0011000000	; nastaveni masky pro nulovani
+				LDR		R1, [R0]
+				BIC		R1, R1, R2			; vynuluj dane bity dle masky
+				
+				MOV		R5, #0x0
+				AND		R5, R4, #0x1 		; vyanduj s maskou
+				MOV		R2, #2_0010000000	; nahod jednicku
+				CMP		R5, 0x1				; je li po vmaskovani jednicka, preskoc nasledujici instrukci
+				BEQ		HOP1_D			
+				MOV		R2, #2_0000000000	; nahod nulu
+HOP1_D			
+				ROR		R4, R4, #0x1		; rotuj hodnotu
+				ORR		R1, R1, R2
+				STR		R1, [R0]
+				
+				; aktivuj nabeznou hranu
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_0001000000
+				ORR		R1, R1, #2_0001000000
+				STR		R1, [R0]
+
+
+				; compoare
+				CMP		R3, #0x7
+				BEQ		CONTINUE_D
+				ADD		R3, R3, #0x1	; incease a value of loading pointer
+				B		LOADING_CIRCLE_D
+				
+CONTINUE_D		
+				MOV		R0, #1
+				BL		DELAY			; pocekej, abys odchytil chveni
+
+				B		CATCH_NUM
 
 				
 

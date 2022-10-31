@@ -75,6 +75,7 @@ MAIN									; MAIN navesti hlavni smycky programu
 										
 				MOV		R7, #4			; vychozi hodnota
 CATCH_NUM
+				MOV		R3, #0x0		; delka zmacknuti counter
 
 PLUS_BUTTON_CHECK
 				LDR		R0, =GPIOC_IDR
@@ -83,12 +84,24 @@ PLUS_BUTTON_CHECK
 				BIC		R1, R1, #2_1111111100000000
 				CMP		R1, #2_01000000
 				BNE		MINUS_BUTTON_CHECK
-				
+PLUS_BUTTON_CHECK_DELAY				
 				MOV		R0, #30
 				BL		DELAY
+				ADD		R3, R3, #0x1
+				
+				LDR		R0, =GPIOC_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_10111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_01000000
+				BEQ		PLUS_BUTTON_CHECK_DELAY
+				
+				CMP		R3, #0x2
+				BHI		PLUS_10
 				
 				ADD		R7, R7, #0x1
-				
+				B		MINUS_BUTTON_CHECK
+PLUS_10			ADD		R7, R7, #0xA
 				
 MINUS_BUTTON_CHECK
 				LDR		R0, =GPIOC_IDR
@@ -97,13 +110,28 @@ MINUS_BUTTON_CHECK
 				BIC		R1, R1, #2_1111111100000000
 				CMP		R1, #2_10000000
 				BNE		OK_BUTTON_CHECK
-				
+MINUS_BUTTON_CHECK_DELAY				
 				MOV		R0, #30
 				BL		DELAY
+				ADD		R3, R3, #0x1
+				
+				LDR		R0, =GPIOC_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_01111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_10000000
+				BEQ		MINUS_BUTTON_CHECK_DELAY
+				
+				CMP		R3, #0x2
+				BHI		MINUS_10
 				
 				SUB		R7, R7, #0x1
+				B		OK_BUTTON_CHECK
+MINUS_10		SUB		R7, R7, #0xA
 				
 OK_BUTTON_CHECK
+
+				
 
 DISPLAYING
 				

@@ -72,11 +72,43 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; byt v obsluze podprogramu tato instrukce jiz pouzita, nebot
 										; by doslo k prepsani LR a ztrate navratove adresy ->
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
+										
+				MOV		R7, #4			; vychozi hodnota
 CATCH_NUM
-				MOV		R7, #47
+
+				LDR		R0, =GPIOC_IDR	; load input address
+				MOV		R3, #0x0		; button counter
+				
+PLUS_BUTTON_CECK
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_10111111
+				TST		R1, #2_01000000		; je-li rovno 1 neni stiskle
+				BEQ		MINUS_BUTTON_CECK
+				ADD		R3, R3, #0x1
+				MOV		R0, #1
+				BL		DELAY
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_10111111
+				TST		R1, #2_01000000
+				BNE		PLUS_BUTTON_CECK
+				
+				CMP		R3, #0x1
+				BEQ		PLUS1
+				ADD		R7, R7, #0xA
+				B		DISPLAYING
+				
+PLUS1			ADD		R7, R7, #0x1
+				B		DISPLAYING
+
+MINUS_BUTTON_CECK
+
+				
+OK_BUTTON_CECK
+				
+				
+
+DISPLAYING
 				MOV		R6, R7
-
-
 NUMEBR_SET_SECTION_T
 
 				CMP		R6, #10
@@ -285,7 +317,7 @@ CONTINUE_D
 
 				B		CATCH_NUM
 
-				
+;; ==============================================
 
 MAIN_PROCESS
 

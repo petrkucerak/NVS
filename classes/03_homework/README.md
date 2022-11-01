@@ -1,4 +1,4 @@
-# Řídící jednotka s dvoumístným 7-segmentovým zobrazovačem
+# Řídící jednotka s dvoumístným 7segmentovým zobrazovačem
 
 Projekt v rámci předmětu **B4B38NVS - Návrh vestavěných systémů 2022**.
 

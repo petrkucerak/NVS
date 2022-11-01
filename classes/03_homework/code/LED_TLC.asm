@@ -29,6 +29,8 @@ konst_blue	EQU	0x0100
 konst_green	EQU	0x0200
 konst_no	EQU	0x0
 	
+magicDelay	EQU	0x70
+	
 NUM_0		EQU	2_11111100
 NUM_1		EQU	2_01100000
 NUM_2		EQU	2_11011010
@@ -82,6 +84,7 @@ TERMINATE_MODE
 ;; ==============================================
 CATCH_NUM
 				MOV		R3, #0x0		; delka zmacknuti counter
+				MOV		R10, R7			; prirazeni nastavene hodnoty do zasobniku pro mod c. 2
 
 PLUS_BUTTON_CHECK
 				LDR		R0, =GPIOC_IDR
@@ -146,9 +149,13 @@ OK_BUTTON_CHECK
 				BL		DELAY
 				
 				MOV		R8, #3
+				MOV		R9, #2
+				MOV		R11, #magicDelay
 				B		DISPLAYING
 ;; ==============================================
 RUN_MODE
+
+				;MOV		R9, #0x2			; status of light: 2 - turn off, 3 - turn on
 
 OK_BUTTON_CHECK_RUN
 				LDR		R0, =GPIOA_IDR
@@ -156,17 +163,56 @@ OK_BUTTON_CHECK_RUN
 				BIC		R1, R1, #2_11111111
 				BIC		R1, R1, #2_1111011100000000
 				CMP		R1, #2_100000000000
-				BNE		SET_LIGHT_TEST
+				BNE		CHECK_BUTTON
 				MOV		R0, #50
 				BL		DELAY
 				
 				MOV		R8, #2
-				B		SET_LIGHT_TEST
+				B		CHECK_BUTTON
 				
-SET_LIGHT_TEST
+CHECK_BUTTON
+				LDR		R0, =GPIOA_IDR
+				LDR		R1, [R0]
+				TST		R1, #0x1			; je-li rovno 1, neni aktivni
+				BEQ		PROCESS
+				MOV		R0, #30
+				BL		DELAY
+				
+				MOV		R7, R10
+				MOV		R9, #0x3
+				
+
+				
+PROCESS
+				CMP		R9, #0x2			; neni-li svetlo aktivovano
+				BEQ		DISPLAYING
+				
+				
+				CMP		R7, #0x0			; je-li donulovano, skorc rovnou na zobrazeni
+				BEQ		NULL
+				; magicka podminka pro zpomaleni
+				CMP		R11, 0x0
+				BNE		MAGIC_SKIP
+				SUB		R7, R7, #0x1		; jinac odecti a zobraz a rozsvit
+				MOV		R11, #magicDelay
+MAGIC_SKIP
+				SUB		R11, R11, 0x1
+											; zapni svetlo
 				LDR		R2, =GPIOC_ODR
 				MOV		R1, #konst_blue
 				STR		R1, [R2]
+				
+				B		DISPLAYING
+				
+NULL			; dostal jsem se na nulu
+				MOV		R9, #0x2			; zmen mod
+				MOV		R7, R10				; nahraj puvodni hodnotu
+											; vypnu svetlo
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_no
+				STR		R1, [R2]
+				
+				MOV		R11, #magicDelay	; magic delay
 				
 				B		DISPLAYING
 				
@@ -175,6 +221,7 @@ SET_LIGHT_TEST
 DISPLAYING
 				
 				MOV		R6, R7
+				
 NUMEBR_SET_SECTION_T
 
 				CMP		R6, #9

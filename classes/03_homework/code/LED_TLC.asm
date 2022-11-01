@@ -85,6 +85,13 @@ TERMINATE_MODE
 CATCH_NUM
 				MOV		R3, #0x0		; delka zmacknuti counter
 				MOV		R10, R7			; prirazeni nastavene hodnoty do zasobniku pro mod c. 2
+				
+TURN_GREEN_LIGHT_ON
+				
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_green
+				STR		R1, [R2]
+				
 
 PLUS_BUTTON_CHECK
 				LDR		R0, =GPIOC_IDR
@@ -155,6 +162,12 @@ OK_BUTTON_CHECK
 ;; ==============================================
 RUN_MODE
 
+TURN_GREEN_LIGHT_OFF
+				
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_no
+				STR		R1, [R2]
+
 				;MOV		R9, #0x2			; status of light: 2 - turn off, 3 - turn on
 
 OK_BUTTON_CHECK_RUN
@@ -167,6 +180,7 @@ OK_BUTTON_CHECK_RUN
 				MOV		R0, #50
 				BL		DELAY
 				
+				MOV		R7, R10				; nahraj pocatecni hodnotu
 				MOV		R8, #2
 				B		CHECK_BUTTON
 				

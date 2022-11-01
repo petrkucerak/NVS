@@ -202,6 +202,18 @@ MAGIC_SKIP
 				MOV		R1, #konst_blue
 				STR		R1, [R2]
 				
+				CMP		R7, #0x6
+				BEQ		TURN_OFF_WARNING
+				CMP		R7, #0x4
+				BEQ		TURN_OFF_WARNING
+				CMP		R7, #0x2
+				BEQ		TURN_OFF_WARNING
+				B		DISPLAYING		
+				
+TURN_OFF_WARNING
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_no
+				STR		R1, [R2]	
 				B		DISPLAYING
 				
 NULL			; dostal jsem se na nulu

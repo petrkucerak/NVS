@@ -64,6 +64,156 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; by doslo k prepsani LR a ztrate navratove adresy ->
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
 										
+										
+TESTING
+				
+				; 02
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R5, #2_00111000
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				; 03
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R5, #2_00001110
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				; 04
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R5, #2_00000110
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				; 05
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_1
+				MOV		R5, #2_01000100
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				
+				
+				
+				
+
+				B		TESTING
+				
+				
+;***************************************************************
+;*********        ~        PODRPOGRAMY       ~         *********
+;***************************************************************
+
+SET_ENABLE_0
+				LDR		R0, =GPIOB_ODR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_100000000
+				ORR		R1, R1, #2_000000000
+				STR		R1, [R0]	
+				
+				BX		LR				; navrat na misto spusteni podprogramu
+
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_ENABLE_1
+				LDR		R0, =GPIOB_ODR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_100000000
+				ORR		R1, R1, #2_100000000
+				STR		R1, [R0]		
+				
+				BX		LR				; navrat na misto spusteni podprogramu
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_RW_0
+				LDR		R0, =GPIOB_ODR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_1000000000
+				ORR		R1, R1, #2_0000000000
+				STR		R1, [R0]
+				
+				BX		LR				; navrat na misto spusteni podprogramu
+
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_RS_1	; instruction / data
+				LDR		R0, =GPIOA_ODR
+				MOV		R2,	#2_1000000000000	; nastaeni masky pro nulovani
+				LDR		R1, [R0]		; nacti hodnotu
+				BIC		R1, R1, R2		; vymazani dle masky
+				MOV		R2, #2_1000000000000		; nastaveni hodnoty
+				ORR		R1, R1, R2		; vyorovani hodnoty
+				STR		R1, [R0]		; ulozeni hodnoty
+				
+				LDR		R0, =GPIOB_ODR
+				MOV		R1, 0x0
+				STR		R1, [R0]
+				
+				BX		LR				; navrat na misto spusteni podprogramu
+
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_RS_0	; instruction / data
+				LDR		R0, =GPIOA_ODR
+				MOV		R2,	#2_1000000000000	; nastaeni masky pro nulovani
+				LDR		R1, [R0]		; nacti hodnotu
+				BIC		R1, R1, R2		; vymazani dle masky
+				MOV		R2, #0x0		; nastaveni hodnoty
+				ORR		R1, R1, R2		; vyorovani hodnoty
+				STR		R1, [R0]		; ulozeni hodnoty
+				
+				LDR		R0, =GPIOB_ODR
+				MOV		R1, 0x0
+				STR		R1, [R0]
+				
+				BX		LR				; navrat na misto spusteni podprogramu
+
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_DB_DATA		; nastaveni dat pomoci shift registeru, hodnota ulozena do R3,
+
+				LDR		R0, =GPIOB_ODR
+				MOV		R5, #0x8		; nastaveni poctu cyklu
+
+CYCLE_1
+				LDR		R1, [R0]
+				MOV		R2, #2_11100000	; nastaveni masky pro vynulovani
+				BIC		R1, R1, R2		; nulovani bitu maskou
+				AND		R2, R3, #0x1	; je-li na konci jednicka
+				MOV		R4, #2_10100000 ; nahod jednicku
+				CMP		R2, #0x1		; porovnej
+				BEQ		HOP_1
+				MOV		R4, #2_10100000 ; neni-li, nahod nulu
+HOP_1			MOV		R2, R4			; zapis hodnotu
+				ROR		R3, R3, #0x1	; rotuj o 1
+				ORR		R2, R1			; nastav hodnotu
+				STR		R1, [R0]		; zapis hodnotu		
+				
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_1000000 ; vymasku hodiny
+				ORR		R1, R1, #2_1000000 ; aktivuj nabeznou hranu
+				STR		R1, [R0]		
+				
+				SUB		R5, R5, #0x1	; odecti 1
+				CMP		R5, #0x0		; ma bezet znovu?
+				BNE		CYCLE_1
+				
+				BX		LR				; navrat na misto spusteni podprogramu
+				
+				
+				
+				
+										
 
 
 ;***************************************************************************************************
@@ -148,7 +298,7 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 ;					: B GATE - (GPIOB_CRL)				0001 0001 0001 0000 0000 0000 0000 0000 | 1111 1111 1111 0000 0000 0000 0000 0000
 ;					: - PB05: out|RESET					0001
 ;					: - PB06: out|CLK					0001
-;					: - PB07: out|ENABLE				0001
+;					: - PB07: out|DATA					0001
 ;					: B GATE - (GPIOB_CRH)				0001 0001 | 1111 1111
 ;					: - PB08: out|ENABLE				0001
 ;					: - PB09: out|R/W					0001

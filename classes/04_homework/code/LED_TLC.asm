@@ -141,24 +141,24 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 ;* Komentar			: 
 ;					: A GATE - (GPIOA_CRL)
 ;					: - PA0: blue button
-;					: A GATE - (GPIOA_CRH)
-;					: - PA11: in|confirm
-;					: - PA12: out|DATA/INSTRUCTION
+;					: A GATE - (GPIOA_CRH)				0001 1000 0000 0000 0000 | 1111 1111 0000 0000 0000
+;					: - PA11: in|confirm				1000
+;					: - PA12: out|DATA/INSTRUCTION		0001
 
-;					: B GATE - (GPIOB_CRL)
-;					: - PB05: out|RESET
-;					: - PB06: out|CLK
-;					: - PB07: out|ENABLE
-;					: B GATE - (GPIOB_CRH)
-;					: - PB08: out|ENABLE
-;					: - PB09: out|R/W
+;					: B GATE - (GPIOB_CRL)				0001 0001 0001 0000 0000 0000 0000 0000 | 1111 1111 1111 0000 0000 0000 0000 0000
+;					: - PB05: out|RESET					0001
+;					: - PB06: out|CLK					0001
+;					: - PB07: out|ENABLE				0001
+;					: B GATE - (GPIOB_CRH)				0001 0001 | 1111 1111
+;					: - PB08: out|ENABLE				0001
+;					: - PB09: out|R/W					0001
 
-;					: C GATE (GPIOC_CRL)
-;					: - PC06: in|UP
-;					: - PC07: in|DOWN
-;					: C GATE (GPIOC_CRH)
-;					: - PC08: blue
-;					: - PC09: green
+;					: C GATE (GPIOC_CRL)				1000 1000 0000 0000 0000 0000 0000 0000 | 1111 1111 0000 0000 0000 0000 0000 0000
+;					: - PC06: in|UP						1000
+;					: - PC07: in|DOWN					1000
+;					: C GATE (GPIOC_CRH)				0001 0001 | 1111 1111
+;					: - PC08: blue						0001
+;					: - PC09: green						0001
 ;**************************************************************************************************
 GPIO_CNF								; Navesti zacatku podprogramu
 Gate_A_LOW		LDR		R2, =0xF		; Konstanta pro nulovani nastaveni bitu 0	
@@ -170,37 +170,37 @@ Gate_A_LOW		LDR		R2, =0xF		; Konstanta pro nulovani nastaveni bitu 0
 				ORR		R1, R1, R2		; maskovani, bit 0 nastven jako push-pull vstup
 				STR		R1, [R0]		; Ulozeni konfigurace PAO0
 				
-Gate_A_HIGH		LDR		R2, =0xF000
+Gate_A_HIGH		LDR		R2, =0xFF000	; mask
 				LDR		R0, =GPIOA_CRH
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x8000
+				MOV		R2, #0x18000	; value
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
-Gate_B_LOW		LDR		R2, =0xFFF00000
+Gate_B_LOW		LDR		R2, =0xFFF00000	; mask
 				LDR		R0, =GPIOB_CRL
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x1100000
+				MOV		R2, #0x1100000	; value
 				ORR		R1, R1, R2
-				MOV		R2, #0x10000000
+				MOV		R2, #0x10000000	; value
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
-Gate_B_HIGH		LDR		R2, =0xFF
+Gate_B_HIGH		LDR		R2, =0xFF		; mask
 				LDR		R0, =GPIOB_CRH
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x11
+				MOV		R2, #0x11		; value
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
-Gate_C_LOW		LDR		R2, =0xFF000000
+Gate_C_LOW		LDR		R2, =0xFF000000	; mask
 				LDR		R0, =GPIOC_CRL
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x88000000
+				MOV		R2, #0x88000000	; value
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				

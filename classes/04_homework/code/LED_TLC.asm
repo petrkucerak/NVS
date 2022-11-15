@@ -65,25 +65,32 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
 										
 										
+				MOV		R0, #100
+				BL		DELAY
+										
+										
 TESTING
 
 				
-				; 02
+				; 02 Nastavení funkce
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
 				MOV		R3, #2_00011100
 				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
-				
 				
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
 				MOV		R3, #2_01110000
 				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
@@ -93,6 +100,19 @@ TESTING
 				BL		SET_RS_0
 				MOV		R3, #2_01100000
 				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_10000000
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
@@ -102,6 +122,8 @@ TESTING
 				BL		SET_RS_1
 				MOV		R3, #2_00100010
 				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
@@ -109,38 +131,16 @@ TESTING
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_1
-				MOV		R3, #2_01010001
+				MOV		R3, #2_11100110
 				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
 				
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_0
-				MOV		R3, #2_00000011
-				BL		SET_DB_DATA
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
 				
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_1
-				MOV		R3, #2_01100010
-				BL		SET_DB_DATA
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
 				
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_0
-				MOV		R3, #2_10100010
-				BL		SET_DB_DATA
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
 				
 				
 				
@@ -195,9 +195,7 @@ SET_RS_1	; instruction / data
 				ORR		R1, R1, R2		; vyorovani hodnoty
 				STR		R1, [R0]		; ulozeni hodnoty
 				
-				LDR		R0, =GPIOB_ODR
-				MOV		R1, #0x0
-				STR		R1, [R0]
+
 				
 				BX		LR				; navrat na misto spusteni podprogramu
 
@@ -211,9 +209,6 @@ SET_RS_0	; instruction / data
 				ORR		R1, R1, R2		; vyorovani hodnoty
 				STR		R1, [R0]		; ulozeni hodnoty
 				
-				LDR		R0, =GPIOB_ODR
-				MOV		R1, #0x0
-				STR		R1, [R0]
 				
 				BX		LR				; navrat na misto spusteni podprogramu
 

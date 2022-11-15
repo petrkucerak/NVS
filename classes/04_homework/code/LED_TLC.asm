@@ -66,42 +66,77 @@ MAIN									; MAIN navesti hlavni smycky programu
 										
 										
 TESTING
+
 				
 				; 02
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R5, #2_00111000
+				MOV		R3, #2_00011100
 				BL		SET_DB_DATA
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
 				
-				; 03
+				
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R5, #2_00001110
+				MOV		R3, #2_01110000
 				BL		SET_DB_DATA
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
 				
-				; 04
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R5, #2_00000110
+				MOV		R3, #2_01100000
 				BL		SET_DB_DATA
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
 				
-				; 05
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_1
-				MOV		R5, #2_01000100
+				MOV		R3, #2_00100010
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_1
+				MOV		R3, #2_01010001
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_00000011
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_1
+				MOV		R3, #2_01100010
+				BL		SET_DB_DATA
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_10100010
 				BL		SET_DB_DATA
 				BL		SET_ENABLE_0
 				MOV		R0, #1
@@ -109,10 +144,13 @@ TESTING
 				
 				
 				
+				B		PAUSE
+
+PAUSE
 				
 				
 
-				B		TESTING
+				B		PAUSE
 				
 				
 ;***************************************************************
@@ -158,7 +196,7 @@ SET_RS_1	; instruction / data
 				STR		R1, [R0]		; ulozeni hodnoty
 				
 				LDR		R0, =GPIOB_ODR
-				MOV		R1, 0x0
+				MOV		R1, #0x0
 				STR		R1, [R0]
 				
 				BX		LR				; navrat na misto spusteni podprogramu
@@ -174,7 +212,7 @@ SET_RS_0	; instruction / data
 				STR		R1, [R0]		; ulozeni hodnoty
 				
 				LDR		R0, =GPIOB_ODR
-				MOV		R1, 0x0
+				MOV		R1, #0x0
 				STR		R1, [R0]
 				
 				BX		LR				; navrat na misto spusteni podprogramu
@@ -184,28 +222,38 @@ SET_DB_DATA		; nastaveni dat pomoci shift registeru, hodnota ulozena do R3,
 
 				LDR		R0, =GPIOB_ODR
 				MOV		R5, #0x8		; nastaveni poctu cyklu
-
+				
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_0011100000
+				ORR		R1, R1, #2_0011100000
+				STR		R1, [R0]
+				
+				
 CYCLE_1
+				LDR		R2, =2_0011000000	; nastaveni masky pro nulovani
 				LDR		R1, [R0]
-				MOV		R2, #2_11100000	; nastaveni masky pro vynulovani
-				BIC		R1, R1, R2		; nulovani bitu maskou
-				AND		R2, R3, #0x1	; je-li na konci jednicka
-				MOV		R4, #2_10100000 ; nahod jednicku
-				CMP		R2, #0x1		; porovnej
+				BIC		R1, R1, R2
+				
+				MOV		R4, #0x0
+				AND		R4, R3, #0x1
+				MOV		R2, #2_0010000000	; nahod jednicku
+				CMP		R4, #0x1			; je-li po proandovani jednicka, preskoc instrukci
 				BEQ		HOP_1
-				MOV		R4, #2_10100000 ; neni-li, nahod nulu
-HOP_1			MOV		R2, R4			; zapis hodnotu
-				ROR		R3, R3, #0x1	; rotuj o 1
-				ORR		R2, R1			; nastav hodnotu
-				STR		R1, [R0]		; zapis hodnotu		
+				MOV		R2, #0x0			; nahod nulu
+HOP_1
+				ROR		R3, R3, #0x1
+				ORR		R1, R1, R2
+				STR		R1, [R0]
 				
+				; aktivuj nabeznou hranu
 				LDR		R1, [R0]
-				BIC		R1, R1, #2_1000000 ; vymasku hodiny
-				ORR		R1, R1, #2_1000000 ; aktivuj nabeznou hranu
-				STR		R1, [R0]		
+				BIC		R1, R1, #2_0001000000
+				ORR		R1, R1, #2_0001000000
+				STR		R1, [R0]
 				
-				SUB		R5, R5, #0x1	; odecti 1
-				CMP		R5, #0x0		; ma bezet znovu?
+				; compare
+				SUB		R5, R5, #0x1
+				CMP		R5, #0x0
 				BNE		CYCLE_1
 				
 				BX		LR				; navrat na misto spusteni podprogramu
@@ -328,31 +376,32 @@ Gate_A_HIGH		LDR		R2, =0xFF000	; mask
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
-Gate_B_LOW		LDR		R2, =0xFFF00000	; mask
+Gate_B_LOW		LDR		R2, =0xFFF00000
 				LDR		R0, =GPIOB_CRL
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x1100000	; value
+				MOV		R2, #0x1100000
 				ORR		R1, R1, R2
-				MOV		R2, #0x10000000	; value
+				MOV		R2, #0x10000000
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
-Gate_B_HIGH		LDR		R2, =0xFF		; mask
+Gate_B_HIGH		LDR		R2, =0xFF
 				LDR		R0, =GPIOB_CRH
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x11		; value
+				MOV		R2, #0x11
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
-Gate_C_LOW		LDR		R2, =0xFF000000	; mask
+Gate_C_LOW		LDR		R2, =0xFF000000
 				LDR		R0, =GPIOC_CRL
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x88000000	; value
+				MOV		R2, #0x88000000
 				ORR		R1, R1, R2
 				STR		R1, [R0]
+				
 				
 Gate_C_HIGH		LDR		R2, =0xFF		; Konstanta pro nulovani nastaveni bitu 8, 9	
 				LDR		R0, =GPIOC_CRH	; Kopie adresy GPIOC_CRH (Port Configuration Register High)

@@ -94,29 +94,108 @@ MAIN									; MAIN navesti hlavni smycky programu
 										
 				MOV		R0, #100
 				BL		DELAY
-				MOV		R7, #99			; time variable
+				MOV		R7, #4			; time variable
+				MOV		R9, #2			; mode: 2 - settings, 3 - executing, 4 - wating
 										
 										
-TESTING
-				
+SET_DISPLAY	
 				BL		CONFIG_DISPLAY
-				
-
-				
-				
 				BL		SET_URL_ADDRESS
-				
-				BL		WRITE_READY_TIME
+				BL		WRITE_SET_TIME
 				BL		WRITE_NUMS
 				
 				
-				B		PAUSE
+RECOGNIZE_MODE
+				CMP		R9, #3
+				BEQ		RUN_MODE
+				
+; SETTING_MODE
+; =============================================================
+				; zobraz display
+				
+TURN_GREEN_LIGHT_ON
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_green
+				STR		R1, [R2]
+				
 
-PAUSE
+PLUS_BUTTON_CHECK
+				MOV		R3, #0x0	; null delay counter
+				
+				LDR		R0, =GPIOC_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_10111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_01000000
+				BNE		MINUS_BUTTON_CHECK
+PLUS_BUTTON_CHECK_DELAY
+				
+				MOV		R0, #30
+				BL		DELAY
+				ADD		R3, R3, #0x1
+				
+				LDR		R0, =GPIOC_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_10111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_01000000
+				BEQ		PLUS_BUTTON_CHECK_DELAY
+				
+				CMP		R3, #0x3
+				BHI		PLUS_10
+				
+				ADD		R7, R7, #0x1
+				B		WRITE_PLUS
+PLUS_10			ADD		R7, R7, #0xA
+
+WRITE_PLUS
+				
+				BL		WRITE_SET_TIME
+				BL		WRITE_NUMS
 				
 				
+MINUS_BUTTON_CHECK
+				MOV		R3, #0x0	; null delay counter
 
-				B		PAUSE
+				LDR		R0, =GPIOC_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_01111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_10000000
+				BNE		OK_BUTTON_CHECK
+MINUS_BUTTON_CHECK_DELAY				
+				MOV		R0, #30
+				BL		DELAY
+				ADD		R3, R3, #0x1
+				
+				LDR		R0, =GPIOC_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_01111111
+				BIC		R1, R1, #2_1111111100000000
+				CMP		R1, #2_10000000
+				BEQ		MINUS_BUTTON_CHECK_DELAY
+				
+				CMP		R3, #0x2
+				BHI		MINUS_10
+				
+				SUB		R7, R7, #0x1
+				B		WRITE_MINUS
+MINUS_10		SUB		R7, R7, #0xA
+
+WRITE_MINUS
+				BL		WRITE_SET_TIME
+				BL		WRITE_NUMS
+
+
+OK_BUTTON_CHECK
+				
+				LTORG
+				B		RECOGNIZE_MODE
+
+				
+RUN_MODE		
+				LTORG
+				B		RECOGNIZE_MODE
 				
 				
 ;***************************************************************

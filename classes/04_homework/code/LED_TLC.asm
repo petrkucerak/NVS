@@ -94,6 +94,7 @@ MAIN									; MAIN navesti hlavni smycky programu
 										
 				MOV		R0, #100
 				BL		DELAY
+				MOV		R7, #99			; time variable
 										
 										
 TESTING
@@ -106,6 +107,7 @@ TESTING
 				BL		SET_URL_ADDRESS
 				
 				BL		WRITE_READY_TIME
+				BL		WRITE_NUMS
 				
 				
 				B		PAUSE
@@ -120,6 +122,70 @@ PAUSE
 ;***************************************************************
 ;*********        ~        PODRPOGRAMY       ~         *********
 ;***************************************************************
+
+WRITE_NUMS
+				PUSH	{LR}
+				MOV		R8, R7
+				
+				CMP		R8, #9			
+				BLS		SET_T_0
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_1
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_2
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_3
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_4
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_5
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_6
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_7
+				SUB		R8, R8, #10
+				CMP		R8, #9			
+				BLS		SET_T_8
+				SUB		R8, R8, #10
+				CMP		R8, #9		
+				BLS		SET_T_9
+
+SET_T_0			MOV		R6, #0x30
+				B		SET_B_NUM
+SET_T_1			MOV		R6, #0x31
+				B		SET_B_NUM
+SET_T_2			MOV		R6, #0x32
+				B		SET_B_NUM
+SET_T_3			MOV		R6, #0x33
+				B		SET_B_NUM
+SET_T_4			MOV		R6, #0x34
+				B		SET_B_NUM
+SET_T_5			MOV		R6, #0x35
+				B		SET_B_NUM
+SET_T_6			MOV		R6, #0x36
+				B		SET_B_NUM
+SET_T_7			MOV		R6, #0x37
+				B		SET_B_NUM
+SET_T_8			MOV		R6, #0x38
+				B		SET_B_NUM
+SET_T_9			MOV		R6, #0x39
+				B		SET_B_NUM
+				
+SET_B_NUM
+				BL		SET_LETTER
+				
+				MOV		R6, #0x30
+				ADD		R6, R6, R8
+				BL		SET_LETTER
+				
+				POP		{PC}
 
 WRITE_SET_TIME
 				PUSH		{LR}

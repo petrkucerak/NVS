@@ -85,6 +85,11 @@ TESTING
 				
 				BL		CONFIG_DISPLAY
 				
+				BL		SET_TOP_ROW
+				
+				
+				
+				BL		SET_BOTTOM_ROW
 				
 				MOV		R6, #asci_p
 				BL		SET_LETTER
@@ -114,8 +119,6 @@ TESTING
 				BL		SET_LETTER
 				MOV		R6, #asci_z
 				BL		SET_LETTER
-				
-				
 				
 				
 				
@@ -150,6 +153,36 @@ SET_LETTER		; use R6 to define current letter value, binary code is backwards
 				POP		{PC}
 
 
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_BOTTOM_ROW
+				PUSH	{LR}
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_00000011
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				POP		{PC}
+				
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_TOP_ROW
+				PUSH	{LR}
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_00000001
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				POP		{PC}
+				
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CONFIG_DISPLAY
 				PUSH	{LR}

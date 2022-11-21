@@ -30,7 +30,19 @@ konst_green	EQU	0x0200
 konst_no	EQU	0x0
 	
 
-; výstup Qx hgfedcba
+; custom ascii table
+
+asci_a 		EQU	2_10000110
+asci_c 		EQU	2_11000110
+asci_e 		EQU	2_10100110
+asci_k 		EQU	2_11010110
+asci_p 		EQU	2_00001110
+asci_r 		EQU	2_01001110
+asci_t 		EQU	2_00101110
+asci_u 		EQU	2_10101110
+asci_z		EQU	2_01011110
+
+asci_dot	EQU	2_01110100
 
 
 
@@ -74,28 +86,34 @@ TESTING
 				BL		CONFIG_DISPLAY
 				
 				
-				; Zápis dat do RAM
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_1
-				MOV		R3, #2_00100010
-				BL		SET_DB_DATA
-				MOV		R0, #1
-				BL		DELAY
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
-				; Zápis dat do RAM
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_1
-				MOV		R3, #2_11100110
-				BL		SET_DB_DATA
-				MOV		R0, #1
-				BL		DELAY
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
+				MOV		R6, #asci_p
+				BL		SET_LETTER
+				MOV		R6, #asci_e
+				BL		SET_LETTER
+				MOV		R6, #asci_t
+				BL		SET_LETTER
+				MOV		R6, #asci_r
+				BL		SET_LETTER
+				MOV		R6, #asci_k
+				BL		SET_LETTER
+				MOV		R6, #asci_u
+				BL		SET_LETTER
+				MOV		R6, #asci_c
+				BL		SET_LETTER
+				MOV		R6, #asci_e
+				BL		SET_LETTER
+				MOV		R6, #asci_r
+				BL		SET_LETTER
+				MOV		R6, #asci_a
+				BL		SET_LETTER
+				MOV		R6, #asci_k
+				BL		SET_LETTER
+				MOV		R6, #asci_dot
+				BL		SET_LETTER
+				MOV		R6, #asci_c
+				BL		SET_LETTER
+				MOV		R6, #asci_z
+				BL		SET_LETTER
 				
 				
 				
@@ -114,6 +132,25 @@ PAUSE
 ;***************************************************************
 ;*********        ~        PODRPOGRAMY       ~         *********
 ;***************************************************************
+SET_LETTER		; use R6 to define current letter value, binary code is backwards
+				
+				PUSH	{LR}
+				
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_1
+				MOV		R3, R6
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				POP		{PC}
+
+
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CONFIG_DISPLAY
 				PUSH	{LR}
 				; 02 Nastavení funkce

@@ -70,53 +70,11 @@ MAIN									; MAIN navesti hlavni smycky programu
 										
 										
 TESTING
-
 				
-				; 02 Nastavení funkce
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_0
-				MOV		R3, #2_00011100
-				BL		SET_DB_DATA
-				MOV		R0, #1
-				BL		DELAY
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
+				BL		CONFIG_DISPLAY
 				
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_0
-				MOV		R3, #2_01110000
-				BL		SET_DB_DATA
-				MOV		R0, #1
-				BL		DELAY
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
 				
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_0
-				MOV		R3, #2_01100000
-				BL		SET_DB_DATA
-				MOV		R0, #1
-				BL		DELAY
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
-				
-				BL		SET_ENABLE_1
-				BL		SET_RW_0
-				BL		SET_RS_0
-				MOV		R3, #2_10000000
-				BL		SET_DB_DATA
-				MOV		R0, #1
-				BL		DELAY
-				BL		SET_ENABLE_0
-				MOV		R0, #1
-				BL		DELAY
-				
+				; Zápis dat do RAM
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_1
@@ -127,7 +85,7 @@ TESTING
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
-				
+				; Zápis dat do RAM
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_1
@@ -156,7 +114,56 @@ PAUSE
 ;***************************************************************
 ;*********        ~        PODRPOGRAMY       ~         *********
 ;***************************************************************
+CONFIG_DISPLAY
+				PUSH	{LR}
+				; 02 Nastavení funkce
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_00011100
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				; Nastavení módu displeje
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_01110000
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				; Nastavení módu vstupu dat
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_01100000
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				; Smaz display
+				BL		SET_ENABLE_1
+				BL		SET_RW_0
+				BL		SET_RS_0
+				MOV		R3, #2_10000000
+				BL		SET_DB_DATA
+				MOV		R0, #1
+				BL		DELAY
+				BL		SET_ENABLE_0
+				MOV		R0, #1
+				BL		DELAY
+				
+				POP		{PC}
 
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 SET_ENABLE_0
 				LDR		R0, =GPIOB_ODR
 				LDR		R1, [R0]

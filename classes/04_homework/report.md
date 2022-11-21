@@ -23,3 +23,8 @@ Průběh programu detailně popisuje následující vývojový diagram.
 ![/vyvojovy-diagram.svg](vyvojovy-diagram.svg)
 
 Png verze: [vyvojovy-diagram.png](https://github.com/petrkucerak/NVS/blob/main/classes/04_homework/vyvojovy-diagram.png)
+
+## Výsledný produkt
+
+![image.jpeg](image.jpeg)
+![animation.gif](animation.gif)

@@ -205,18 +205,80 @@ OK_BUTTON_CHECK
 				BL		WRITE_READY_TIME
 				BL		WRITE_NUMS
 				
+				MOV		R10, R7
+				
 				; turn of a green light
 				LDR		R2, =GPIOC_ODR
 				MOV		R1, #konst_no
 				STR		R1, [R2]
 				
 				
-				LTORG
 				B		RECOGNIZE_MODE
+				LTORG
 
+; RUN MODE
+; =============================================================			
+RUN_MODE
+
+CHECK_BUTTON	
+				LDR		R0, =GPIOA_IDR
+				LDR		R1, [R0]
+				TST		R1, #0x1			; je-li rovno 1, neni aktivni
+				BEQ		CHECK_EXEC
+				MOV		R0, #30
+				BL		DELAY
 				
-RUN_MODE		
-;CHECK_OK_BUTTTON
+				MOV		R7, R10				; copy time of a light shine
+				MOV		R9, #0x3			; set mode: executing
+				
+				; display RUN TIME
+				BL		CONFIG_DISPLAY
+				BL		SET_URL_ADDRESS
+				BL		WRITE_RUN_TIME
+				BL		WRITE_NUMS
+				
+				; turn on blue light
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_blue
+				STR		R1, [R2]
+				
+				MOV		R11, #0x0			; magic delay variable
+				
+				
+CHECK_EXEC		
+				CMP		R9, #0x3
+				BNE		CHECK_OK_BUTTTON
+				
+				CMP		R11, #0x90000	; set magic delay
+				BNE		MAGIC_SUB			; pokud dojede magicky delay na nulu, zreseti a odecti
+				MOV		R11, #0x0
+				SUB		R7, #0x1
+				
+				BL		WRITE_RUN_TIME
+				BL		WRITE_NUMS
+				
+MAGIC_SUB
+				ADD		R11, #0x1
+				
+NULL
+				CMP		R7, #0x0
+				BNE		CHECK_OK_BUTTTON
+				
+				
+				MOV		R9, #0x4		; set mode: waiting
+				MOV		R7, R10			; recovery time of a light shine
+				
+				; turn off blue light
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_no
+				STR		R1, [R2]
+				
+				; display ready mode
+				BL		WRITE_READY_TIME
+				BL		WRITE_NUMS
+				
+
+CHECK_OK_BUTTTON
 				LDR		R0, =GPIOA_IDR
 				LDR		R1, [R0]
 				BIC		R1, R1, #2_11111111
@@ -233,8 +295,11 @@ RUN_MODE
 				BL		WRITE_SET_TIME
 				BL		WRITE_NUMS
 				
-				LTORG
+				
+				
+				
 				B		RECOGNIZE_MODE
+				LTORG
 				
 				
 ;***************************************************************

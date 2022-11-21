@@ -91,6 +91,12 @@ MAIN									; MAIN navesti hlavni smycky programu
 										; by doslo k prepsani LR a ztrate navratove adresy ->
 										; lze ale pouzit i jine instrukce (PUSH, POP) *!*
 										
+				BL		USART_CNF
+				
+
+
+;================================
+										
 										
 				MOV		R0, #100
 				BL		DELAY
@@ -101,6 +107,12 @@ MAIN									; MAIN navesti hlavni smycky programu
 SET_DISPLAY	
 				BL		CONFIG_DISPLAY
 				BL		SET_URL_ADDRESS
+				
+				BL		CLEAR_UART
+				BL		CLEAR_UART
+				BL		CLEAR_UART
+				BL		CLEAR_UART
+				
 				BL		WRITE_SET_TIME
 				BL		WRITE_NUMS
 				
@@ -150,7 +162,7 @@ PLUS_BUTTON_CHECK_DELAY
 PLUS_10			ADD		R7, R7, #0xA
 
 WRITE_PLUS
-				
+				BL		CLEAR_UART
 				BL		WRITE_SET_TIME
 				BL		WRITE_NUMS
 				
@@ -184,6 +196,7 @@ MINUS_BUTTON_CHECK_DELAY
 MINUS_10		SUB		R7, R7, #0xA
 
 WRITE_MINUS
+				BL		CLEAR_UART
 				BL		WRITE_SET_TIME
 				BL		WRITE_NUMS
 
@@ -202,6 +215,7 @@ OK_BUTTON_CHECK
 				MOV		R9, #0x4		; set mode: waiting
 				
 				; write new display text
+				BL		CLEAR_UART
 				BL		WRITE_READY_TIME
 				BL		WRITE_NUMS
 				
@@ -234,6 +248,10 @@ CHECK_BUTTON
 				; display RUN TIME
 				BL		CONFIG_DISPLAY
 				BL		SET_URL_ADDRESS
+				
+				BL		CLEAR_UART
+				BL		CLEAR_UART
+				
 				BL		WRITE_RUN_TIME
 				BL		WRITE_NUMS
 				
@@ -254,6 +272,7 @@ CHECK_EXEC
 				MOV		R11, #0x0
 				SUB		R7, #0x1
 				
+				BL		CLEAR_UART
 				BL		WRITE_RUN_TIME
 				BL		WRITE_NUMS
 				
@@ -274,6 +293,7 @@ NULL
 				STR		R1, [R2]
 				
 				; display ready mode
+				BL		CLEAR_UART
 				BL		WRITE_READY_TIME
 				BL		WRITE_NUMS
 				
@@ -293,6 +313,10 @@ CHECK_OK_BUTTTON
 				
 				BL		CONFIG_DISPLAY
 				BL		SET_URL_ADDRESS
+				
+				BL		CLEAR_UART
+				BL		CLEAR_UART
+				
 				BL		WRITE_SET_TIME
 				BL		WRITE_NUMS
 				
@@ -368,6 +392,7 @@ SET_B_NUM
 				MOV		R6, #0x30
 				ADD		R6, R6, R8
 				BL		SET_LETTER
+				
 				
 				POP		{PC}
 
@@ -490,6 +515,30 @@ SET_URL_ADDRESS
 				POP		{PC}
 				
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CLEAR_UART
+				PUSH	{LR}
+				
+				MOV		R2, #0xF
+CLEAR_UART_LOOP	
+				SUB		R2, R2, #0x1
+				LDR		R0, =USART_DR
+				MOV		R1, #0x7F
+				STR		R1, [R0]
+
+CLEAR_UART_WAIT_FOR_SEND
+				LDR		R0, =USART_SR
+				LDR		R1, [R0]
+				AND		R1, R1, #2_1000000
+				CMP		R1, #2_1000000
+				BNE		CLEAR_UART_WAIT_FOR_SEND
+				
+				
+				CMP		R2, #0x0
+				BNE		CLEAR_UART_LOOP
+				
+				POP		{PC}
+				
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 SET_LETTER		; use R6 to define current letter value
 				
 				PUSH	{LR}
@@ -504,6 +553,13 @@ SET_LETTER		; use R6 to define current letter value
 				BL		SET_ENABLE_0
 				MOV		R0, #1
 				BL		DELAY
+				
+				
+				; write to UART
+				LDR		R0, =USART_DR
+				MOV		R1, R6
+				STR		R1, [R0]
+				
 				
 				POP		{PC}
 
@@ -752,7 +808,9 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 
 				LDR		R0, =RCC_APB2ENR; Kopie adresy RCC_APB2ENR (APB2 peripheral clock enable register) do R0  
 				LDR		R1, [R0]		; Nacteni stavu registru RCC_APB2ENR do R1
-				LDR		R2, =0x1C		; Konstanta pro zapnuti hodin pro branu A, B a C
+				; 00011100 - without UART
+				; 0100000000011101 - with UART
+				LDR		R2, =0x401D		; Konstanta pro zapnuti hodin pro branu A, B a C a UART
 				ORR		R1, R1, R2		; Maskovani		
 				STR		R1, [R0]		; Ulozeni nove hodnoty
 
@@ -766,9 +824,9 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 ;* Komentar			: 
 ;					: A GATE - (GPIOA_CRL)
 ;					: - PA0: blue button
-;					: A GATE - (GPIOA_CRH)				0001 1000 0100 1010 0000 | 1111 1111 1111 1111 0000
+;					: A GATE - (GPIOA_CRH)				0001 1000 1011 1010 0000 | 1111 1111 1111 1111 0000
 ;					: - PA09: in|RxD					1010
-;					: - PA10: out|TxD					0100
+;					: - PA10: out|TxD					1011
 ;					: - PA11: in|confirm				1000
 ;					: - PA12: out|DATA/INSTRUCTION		0001
 
@@ -797,13 +855,13 @@ Gate_A_LOW		LDR		R2, =0xF		; Konstanta pro nulovani nastaveni bitu 0
 				ORR		R1, R1, R2		; maskovani, bit 0 nastven jako push-pull vstup
 				STR		R1, [R0]		; Ulozeni konfigurace PAO0
 				
-Gate_A_HIGH		LDR		R2, =0xFFFF0	; mask
+Gate_A_HIGH		LDR		R2, =0xFF0F0	; mask
 				LDR		R0, =GPIOA_CRH
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x18400	; value
+				MOV		R2, #0x18000	; value
 				ORR		R1, R1, R2
-				MOV		R2, #0x000A0
+				MOV		R2, #0x0A0
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				
@@ -844,6 +902,28 @@ Gate_C_HIGH		LDR		R2, =0xFF		; Konstanta pro nulovani nastaveni bitu 8, 9
 				STR		R1, [R0]		; Ulozeni konfigurace PCO9 a PC09
 
 				BX		LR				; Navrat z podprogramu, skok na adresu v LR
+				
+;*********************************************************************************************
+;* Jmeno funkce		: UART_CNF
+;* Popis			: Konfigurace USART1 pro prijem i vysilani
+;* Vstup			: Zadny
+;* Vystup			: Zadny
+;* Komentar			: Nastaveni USART1 s prenosovou rychlosti 9600Bd
+;*					 (1 start bit, 8 data bit , 1 stop bit) 	
+;*********************************************************************************************					
+USART_CNF		PUSH	{LR}
+
+				LDR		R0, =USART_BRR	   ; BAUD RATE registr
+				LDR		R1, =0x009C4	   ; RATE 9600Bd (156.25 PRO 24MHz), 156 = 0x9C0, 0,25 = 0x4 
+				STR		R1, [R0]
+
+				LDR		R0, =USART_CR1	   ; control registr
+				LDR		R1, [R0]
+				LDR		R2, =0x200C	   	   ; USART povolen (UE = 1), vysilani i prijem povoleno (TE = 1),RE = 1
+				ORR		R1, R1, R2 
+				STR		R1, [R0]
+				
+				POP		{PC}
 
 ;**************************************************************************************************
 ;* Jmeno funkce		: DELAY
@@ -864,6 +944,8 @@ WAIT			SUBS	R2, R2, #1		; Odecteni 1 od R2,tj. R2 = R2 - 1 a nastaveni priznakov
 			
 				POP		{R2, PC}		; Navrat z podprogramu, obnoveni hodnoty R2 ze zasobniku
 										; a navratove adresy do PC
+
+
 
 ;**************************************************************************************************
 				NOP

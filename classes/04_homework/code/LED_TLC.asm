@@ -41,6 +41,21 @@ asci_r 		EQU	0x72
 asci_t 		EQU	0x74
 asci_u 		EQU	0x75
 asci_z		EQU	0x7A
+	
+asci_A		EQU	0x41
+asci_D		EQU	0x44
+asci_E		EQU	0x45
+asci_I		EQU	0x49
+asci_M		EQU	0x4D
+asci_N		EQU	0x4E
+asci_R		EQU	0x52
+asci_S		EQU	0x53
+asci_T		EQU	0x54
+asci_U		EQU	0x55
+asci_Y		EQU	0x59
+
+asci_space	EQU	0x20
+asci_equals	EQU	0x3D
 
 asci_dot	EQU	0x2E
 
@@ -85,13 +100,115 @@ TESTING
 				
 				BL		CONFIG_DISPLAY
 				
+
+				
+				
+				BL		SET_URL_ADDRESS
+				
+				BL		WRITE_READY_TIME
+				
+				
+				B		PAUSE
+
+PAUSE
+				
+				
+
+				B		PAUSE
+				
+				
+;***************************************************************
+;*********        ~        PODRPOGRAMY       ~         *********
+;***************************************************************
+
+WRITE_SET_TIME
+				PUSH		{LR}
 				BL		SET_TOP_ROW
-				
-				
-				
+				MOV		R6, #asci_S
+				BL		SET_LETTER
+				MOV		R6, #asci_E
+				BL		SET_LETTER
+				MOV		R6, #asci_T
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				MOV		R6, #asci_T
+				BL		SET_LETTER
+				MOV		R6, #asci_I
+				BL		SET_LETTER
+				MOV		R6, #asci_M
+				BL		SET_LETTER
+				MOV		R6, #asci_E
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				MOV		R6, #asci_equals
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				POP 	{PC}
+
+WRITE_RUN_TIME
+				PUSH		{LR}
+				BL		SET_TOP_ROW
+				MOV		R6, #asci_R
+				BL		SET_LETTER
+				MOV		R6, #asci_U
+				BL		SET_LETTER
+				MOV		R6, #asci_N
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				MOV		R6, #asci_T
+				BL		SET_LETTER
+				MOV		R6, #asci_I
+				BL		SET_LETTER
+				MOV		R6, #asci_M
+				BL		SET_LETTER
+				MOV		R6, #asci_E
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				MOV		R6, #asci_equals
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				POP 	{PC}
+
+WRITE_READY_TIME
+				PUSH		{LR}
+				BL		SET_TOP_ROW
+				MOV		R6, #asci_R
+				BL		SET_LETTER
+				MOV		R6, #asci_E
+				BL		SET_LETTER
+				MOV		R6, #asci_A
+				BL		SET_LETTER
+				MOV		R6, #asci_D
+				BL		SET_LETTER
+				MOV		R6, #asci_Y
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				MOV		R6, #asci_T
+				BL		SET_LETTER
+				MOV		R6, #asci_I
+				BL		SET_LETTER
+				MOV		R6, #asci_M
+				BL		SET_LETTER
+				MOV		R6, #asci_E
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				MOV		R6, #asci_equals
+				BL		SET_LETTER
+				MOV		R6, #asci_space
+				BL		SET_LETTER
+				POP 	{PC}
+
+SET_URL_ADDRESS
+				PUSH	{LR}
 				BL		SET_BOTTOM_ROW
-				
-				
 				MOV		R6, #asci_p
 				BL		SET_LETTER
 				MOV		R6, #asci_e
@@ -120,23 +237,10 @@ TESTING
 				BL		SET_LETTER
 				MOV		R6, #asci_z
 				BL		SET_LETTER
+				POP		{PC}
 				
-				
-				
-				
-				B		PAUSE
-
-PAUSE
-				
-				
-
-				B		PAUSE
-				
-				
-;***************************************************************
-;*********        ~        PODRPOGRAMY       ~         *********
-;***************************************************************
-SET_LETTER		; use R6 to define current letter value, binary code is backwards
+; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+SET_LETTER		; use R6 to define current letter value
 				
 				PUSH	{LR}
 				

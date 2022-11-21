@@ -119,7 +119,7 @@ SET_DISPLAY
 				
 RECOGNIZE_MODE
 				CMP		R9, #2
-				BNE		RUN_MODE
+				BNE.W		RUN_MODE
 				
 				
 ; SETTING_MODE
@@ -130,6 +130,22 @@ TURN_GREEN_LIGHT_ON
 				LDR		R2, =GPIOC_ODR
 				MOV		R1, #konst_green
 				STR		R1, [R2]
+				
+UART_IN
+				LDR		R0, =USART_SR
+				LDR		R1, [R0]
+				AND		R1, R1, #2_100000
+				CMP		R1, #2_100000
+				BNE		PLUS_BUTTON_CHECK	; pokud neni flag o prijmu dat z serialu v 1, skoc na terminaci tlacitek
+				
+				LDR		R0, =USART_DR
+				LDR		R1, [R0]
+				CMP		R1, #0x2B
+				BEQ		PLUS_1
+				CMP		R1, #0x2D
+				BEQ		MINUS_1
+				CMP		R1, #0x20
+				BEQ		OK_1
 				
 
 PLUS_BUTTON_CHECK
@@ -157,7 +173,7 @@ PLUS_BUTTON_CHECK_DELAY
 				CMP		R3, #0x3
 				BHI		PLUS_10
 				
-				ADD		R7, R7, #0x1
+PLUS_1			ADD		R7, R7, #0x1
 				B		WRITE_PLUS
 PLUS_10			ADD		R7, R7, #0xA
 
@@ -191,7 +207,7 @@ MINUS_BUTTON_CHECK_DELAY
 				CMP		R3, #0x2
 				BHI		MINUS_10
 				
-				SUB		R7, R7, #0x1
+MINUS_1			SUB		R7, R7, #0x1
 				B		WRITE_MINUS
 MINUS_10		SUB		R7, R7, #0xA
 
@@ -212,7 +228,7 @@ OK_BUTTON_CHECK
 				BL		DELAY
 				
 				; if it is pushed
-				MOV		R9, #0x4		; set mode: waiting
+OK_1			MOV		R9, #0x4		; set mode: waiting
 				
 				; write new display text
 				BL		CLEAR_UART
@@ -234,6 +250,20 @@ OK_BUTTON_CHECK
 ; =============================================================			
 RUN_MODE
 
+UART_IN_RUN
+				LDR		R0, =USART_SR
+				LDR		R1, [R0]
+				AND		R1, R1, #2_100000
+				CMP		R1, #2_100000
+				BNE		CHECK_BUTTON	; pokud neni flag o prijmu dat z serialu v 1, skoc na terminaci tlacitek
+				
+				LDR		R0, =USART_DR
+				LDR		R1, [R0]
+				CMP		R1, #0x20
+				BEQ		OK_2
+				CMP		R1, #0x53
+				BEQ		LIGHT_TURN_ON
+
 CHECK_BUTTON	
 				LDR		R0, =GPIOA_IDR
 				LDR		R1, [R0]
@@ -242,7 +272,7 @@ CHECK_BUTTON
 				MOV		R0, #30
 				BL		DELAY
 				
-				MOV		R7, R10				; copy time of a light shine
+LIGHT_TURN_ON	MOV		R7, R10				; copy time of a light shine
 				MOV		R9, #0x3			; set mode: executing
 				
 				; display RUN TIME
@@ -308,7 +338,7 @@ CHECK_OK_BUTTTON
 				MOV		R0, #50
 				BL		DELAY
 				
-				MOV		R9, #0x2 		; set mode: setting
+OK_2			MOV		R9, #0x2 		; set mode: setting
 				MOV		R7, R10
 				
 				BL		CONFIG_DISPLAY
@@ -512,8 +542,9 @@ SET_URL_ADDRESS
 				BL		SET_LETTER
 				MOV		R6, #asci_z
 				BL		SET_LETTER
-				POP		{PC}
-				
+				POP		{PC}	
+
+
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 CLEAR_UART
 				PUSH	{LR}

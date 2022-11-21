@@ -766,7 +766,9 @@ NO_PLL_RDY		LDR		R1, [R0]		; Nacteni stavu registru RCC_CR do R1
 ;* Komentar			: 
 ;					: A GATE - (GPIOA_CRL)
 ;					: - PA0: blue button
-;					: A GATE - (GPIOA_CRH)				0001 1000 0000 0000 0000 | 1111 1111 0000 0000 0000
+;					: A GATE - (GPIOA_CRH)				0001 1000 0100 1010 0000 | 1111 1111 1111 1111 0000
+;					: - PA09: in|RxD					1010
+;					: - PA10: out|TxD					0100
 ;					: - PA11: in|confirm				1000
 ;					: - PA12: out|DATA/INSTRUCTION		0001
 
@@ -795,11 +797,13 @@ Gate_A_LOW		LDR		R2, =0xF		; Konstanta pro nulovani nastaveni bitu 0
 				ORR		R1, R1, R2		; maskovani, bit 0 nastven jako push-pull vstup
 				STR		R1, [R0]		; Ulozeni konfigurace PAO0
 				
-Gate_A_HIGH		LDR		R2, =0xFF000	; mask
+Gate_A_HIGH		LDR		R2, =0xFFFF0	; mask
 				LDR		R0, =GPIOA_CRH
 				LDR		R1, [R0]
 				BIC		R1, R1, R2
-				MOV		R2, #0x18000	; value
+				MOV		R2, #0x18400	; value
+				ORR		R1, R1, R2
+				MOV		R2, #0x000A0
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				

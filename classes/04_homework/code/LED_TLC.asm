@@ -289,6 +289,7 @@ CHECK_OK_BUTTTON
 				BL		DELAY
 				
 				MOV		R9, #0x2 		; set mode: setting
+				MOV		R7, R10
 				
 				BL		CONFIG_DISPLAY
 				BL		SET_URL_ADDRESS

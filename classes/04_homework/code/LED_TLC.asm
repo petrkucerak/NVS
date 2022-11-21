@@ -106,8 +106,9 @@ SET_DISPLAY
 				
 				
 RECOGNIZE_MODE
-				CMP		R9, #3
-				BEQ		RUN_MODE
+				CMP		R9, #2
+				BNE		RUN_MODE
+				
 				
 ; SETTING_MODE
 ; =============================================================
@@ -188,12 +189,50 @@ WRITE_MINUS
 
 
 OK_BUTTON_CHECK
+				LDR		R0, =GPIOA_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_11111111
+				BIC		R1, R1, #2_1111011100000000
+				CMP		R1, #2_100000000000
+				BNE		RECOGNIZE_MODE
+				MOV		R0, #50
+				BL		DELAY
+				
+				; if it is pushed
+				MOV		R9, #0x4		; set mode: waiting
+				
+				; write new display text
+				BL		WRITE_READY_TIME
+				BL		WRITE_NUMS
+				
+				; turn of a green light
+				LDR		R2, =GPIOC_ODR
+				MOV		R1, #konst_no
+				STR		R1, [R2]
+				
 				
 				LTORG
 				B		RECOGNIZE_MODE
 
 				
 RUN_MODE		
+;CHECK_OK_BUTTTON
+				LDR		R0, =GPIOA_IDR
+				LDR		R1, [R0]
+				BIC		R1, R1, #2_11111111
+				BIC		R1, R1, #2_1111011100000000
+				CMP		R1, #2_100000000000
+				BNE		RECOGNIZE_MODE
+				MOV		R0, #50
+				BL		DELAY
+				
+				MOV		R9, #0x2 		; set mode: setting
+				
+				BL		CONFIG_DISPLAY
+				BL		SET_URL_ADDRESS
+				BL		WRITE_SET_TIME
+				BL		WRITE_NUMS
+				
 				LTORG
 				B		RECOGNIZE_MODE
 				

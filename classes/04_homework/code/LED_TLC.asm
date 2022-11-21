@@ -32,17 +32,17 @@ konst_no	EQU	0x0
 
 ; custom ascii table
 
-asci_a 		EQU	2_10000110
-asci_c 		EQU	2_11000110
-asci_e 		EQU	2_10100110
-asci_k 		EQU	2_11010110
-asci_p 		EQU	2_00001110
-asci_r 		EQU	2_01001110
-asci_t 		EQU	2_00101110
-asci_u 		EQU	2_10101110
-asci_z		EQU	2_01011110
+asci_a 		EQU	0x61
+asci_c 		EQU	0x63
+asci_e 		EQU	0x65
+asci_k 		EQU	0x6B
+asci_p 		EQU	0x70
+asci_r 		EQU	0x72
+asci_t 		EQU	0x74
+asci_u 		EQU	0x75
+asci_z		EQU	0x7A
 
-asci_dot	EQU	2_01110100
+asci_dot	EQU	0x2E
 
 
 
@@ -90,6 +90,7 @@ TESTING
 				
 				
 				BL		SET_BOTTOM_ROW
+				
 				
 				MOV		R6, #asci_p
 				BL		SET_LETTER
@@ -159,7 +160,7 @@ SET_BOTTOM_ROW
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R3, #2_00000011
+				MOV		R3, #2_11000000
 				BL		SET_DB_DATA
 				MOV		R0, #1
 				BL		DELAY
@@ -174,7 +175,7 @@ SET_TOP_ROW
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R3, #2_00000001
+				MOV		R3, #2_10000000
 				BL		SET_DB_DATA
 				MOV		R0, #1
 				BL		DELAY
@@ -190,7 +191,7 @@ CONFIG_DISPLAY
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R3, #2_00011100
+				MOV		R3, #2_00111000
 				BL		SET_DB_DATA
 				MOV		R0, #1
 				BL		DELAY
@@ -201,7 +202,7 @@ CONFIG_DISPLAY
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R3, #2_01110000
+				MOV		R3, #2_00001110
 				BL		SET_DB_DATA
 				MOV		R0, #1
 				BL		DELAY
@@ -212,7 +213,7 @@ CONFIG_DISPLAY
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R3, #2_01100000
+				MOV		R3, #2_00000110
 				BL		SET_DB_DATA
 				MOV		R0, #1
 				BL		DELAY
@@ -223,7 +224,7 @@ CONFIG_DISPLAY
 				BL		SET_ENABLE_1
 				BL		SET_RW_0
 				BL		SET_RS_0
-				MOV		R3, #2_10000000
+				MOV		R3, #2_00000001
 				BL		SET_DB_DATA
 				MOV		R0, #1
 				BL		DELAY
@@ -307,13 +308,13 @@ CYCLE_1
 				BIC		R1, R1, R2
 				
 				MOV		R4, #0x0
-				AND		R4, R3, #0x1
+				AND		R4, R3, #2_10000000
 				MOV		R2, #2_0010000000	; nahod jednicku
-				CMP		R4, #0x1			; je-li po proandovani jednicka, preskoc instrukci
+				CMP		R4, #2_10000000		; je-li po proandovani jednicka, preskoc instrukci
 				BEQ		HOP_1
 				MOV		R2, #0x0			; nahod nulu
 HOP_1
-				ROR		R3, R3, #0x1
+				LSL		R3, R3, #0x1
 				ORR		R1, R1, R2
 				STR		R1, [R0]
 				

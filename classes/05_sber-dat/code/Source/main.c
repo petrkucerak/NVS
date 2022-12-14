@@ -13,6 +13,8 @@
 
 /*Global variables*/
 uint16_t tmp;
+char *welcome = "The start of measuring!\n";
+uint8_t i;
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -20,7 +22,8 @@ static void GPIO_Configuration(void);
 static void Delay(vu32 nCount);
 static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
-uint16_t SART_WaitToReceivedData(USART_TypeDef *USARTx);
+uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
+static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx);
 
 void SystemInit(void) {
   // Prazdna inicializacni metoda
@@ -35,6 +38,8 @@ int main(void) {
   /* Clear TC flag */
   USART2->SR &= 0xFFBF;
 
+  printU(welcome, 25, USART2);
+
   /*Nekonecna smycka*/
   while (1) {
     if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
@@ -46,9 +51,9 @@ int main(void) {
       GPIOC->BSRR |= 0x1000000; // ne zhasneme LED na PC8
     }
 
-    /* Echo template */
-    tmp = SART_WaitToReceivedData(USART2); // wait for a data
-    USART_SendData(USART2, tmp); // send data back
+    // /* Echo template */
+    // tmp = USART_WaitToReceivedData(USART2); // wait for a data
+    // USART_SendData(USART2, tmp);            // send data back
   }
 }
 /*Inicializace RCC*/
@@ -146,9 +151,15 @@ static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data) {
   }
 }
 
-uint16_t SART_WaitToReceivedData(USART_TypeDef *USARTx) {
+uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx) {
   /* Is Read Data Register Not Empty */
   while ((USARTx->SR & USART_SR_RXNE) != USART_SR_RXNE) {
   }
   return USARTx->DR;
+}
+
+static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx) {
+  for (i = 0; i < tx_ptr; ++i) {
+    USART_SendData(USARTx, string[i]);
+  }
 }

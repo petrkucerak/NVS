@@ -90,7 +90,8 @@ static void RCC_Configuration(void) {
   /* Peripheral clock enable */
   RCC->APB2ENR |= RCC_APB2ENR_IOPAEN; // enable PA
   RCC->APB2ENR |= RCC_APB2ENR_IOPCEN; // enable PC
-  // RCC->APB2ENR |= 0x14;
+
+  RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 for PWA
 
   RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // enable USART2 clock
 }

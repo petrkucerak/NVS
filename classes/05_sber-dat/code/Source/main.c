@@ -23,6 +23,17 @@ static void Delay(vu32 nCount);
 static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
+/**
+ * @brief Function turns on blue led light
+ *
+ */
+static void blueLedOn();
+
+/**
+ * @brief Function turns off blue led light
+ *
+ */
+static void blueLedOff();
 static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx);
 
 void SystemInit(void)
@@ -44,18 +55,14 @@ int main(void)
 
    /*Nekonecna smycka*/
    while (1) {
-      if (GPIOA->IDR & 0x1) {  // je PA0 stisknuto??
-         GPIOC->BSRR |= 0x100; // ANO rozsvitime LED na PC8
+      if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
+         blueLedOn();
 
          USART_SendData(USART2, 0x61);
 
       } else {
-         GPIOC->BSRR |= 0x1000000; // ne zhasneme LED na PC8
+         blueLedOff();
       }
-
-      // /* Echo template */
-      // tmp = USART_WaitToReceivedData(USART2); // wait for a data
-      // USART_SendData(USART2, tmp);            // send data back
    }
 }
 /*Inicializace RCC*/
@@ -173,3 +180,7 @@ static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx)
       USART_SendData(USARTx, string[i]);
    }
 }
+
+static void blueLedOn() { GPIOC->BSRR |= 0x100; }
+
+static void blueLedOff() { GPIOC->BSRR |= 0x1000000; }

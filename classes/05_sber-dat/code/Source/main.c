@@ -22,19 +22,19 @@ static void GPIO_Configuration(void);
 static void Delay(vu32 nCount);
 static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
-static void TIM2_Configuration(void);
+static void TIM2_configuration_PWM(void);
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
 /**
  * @brief Function turns on blue led light
  *
  */
-static void blue_led_on();
+static void blue_led_on(void);
 
 /**
  * @brief Function turns off blue led light
  *
  */
-static void blue_led_off();
+static void blue_led_off(void);
 static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx);
 
 void SystemInit(void)
@@ -48,6 +48,7 @@ int main(void)
    RCC_Configuration();  // inicializace hodin
    GPIO_Configuration(); // inicializace GPIO
    USART2_Configuration();
+   TIM2_configuration_PWM();
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -124,7 +125,7 @@ static void GPIO_Configuration(void)
    GPIOA->CRL &= 0xFFFFFF0F;
    GPIOA->CRL |= 0x000000B0;
 
-   /* Configure PA2 (USART2 TX): alternate func. output Push-pull, 10MHz */
+   /* Configure PA2 (USART2 TX): alternate func. output Push-pull, 50MHz */
    GPIOA->CRL &= 0xFFFFF0FF;
    GPIOA->CRL |= 0x00000B00;
 
@@ -161,7 +162,28 @@ static void USART2_Configuration(void)
    USART2->CR1 |= USART_CR1_UE;
 }
 
-static void TIM2_Configuration(void) {}
+static void TIM2_configuration_PWM(void)
+{
+   TIM2->CR1 = 0x0080;
+   TIM2->CCMR1 = 0x6800;
+   TIM2->CCER = 0x1;
+   TIM2->PSC = 0;
+   TIM2->ARR = 24000;
+   TIM2->CCR2 = 12000;
+   TIM2->CR1 |= 0x1;
+
+   // TIM2->TIM_ARR_ARR = 0x0100;   // determined frequency
+   // TIM2->TIM_CCR2_CCR2 = 0x1388; // duty cycle 50%
+
+   // TIM2->TIM_PSC_PSC = 0x0001; // delicka fCK_PSC/(PSC[15:0] + 1), deleno 2
+
+   //    TIM2->TIM_CCMR1_OC2PE = 0x1;  // enable preload
+   // TIM2->TIM_CCMR1_OC2M_0 = 0x0; // output compare mode
+   // TIM2->TIM_CCMR1_OC2M_1 = 0x1; // output compare mode
+   // TIM2->TIM_CCMR1_OC2M_2 = 0x1; // output compare mode
+
+   // TIM2->TIM_CR1_CEN = 0x1; // enable TIM2
+}
 
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)
 {
@@ -191,6 +213,6 @@ static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx)
    }
 }
 
-static void blue_led_on() { GPIOC->BSRR |= 0x100; }
+static void blue_led_on(void) { GPIOC->BSRR |= 0x100; }
 
-static void blue_led_off() { GPIOC->BSRR |= 0x1000000; }
+static void blue_led_off(void) { GPIOC->BSRR |= 0x1000000; }

@@ -22,18 +22,19 @@ static void GPIO_Configuration(void);
 static void Delay(vu32 nCount);
 static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
+static void TIM2_Configuration(void);
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
 /**
  * @brief Function turns on blue led light
  *
  */
-static void blueLedOn();
+static void blue_led_on();
 
 /**
  * @brief Function turns off blue led light
  *
  */
-static void blueLedOff();
+static void blue_led_off();
 static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx);
 
 void SystemInit(void)
@@ -55,13 +56,14 @@ int main(void)
 
    /*Nekonecna smycka*/
    while (1) {
+      tmp = USART_WaitToReceivedData(USART2);
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
-         blueLedOn();
+         blue_led_on();
 
-         USART_SendData(USART2, 0x61);
+         USART_SendData(USART2, tmp);
 
       } else {
-         blueLedOff();
+         blue_led_off();
       }
    }
 }
@@ -104,6 +106,8 @@ static void RCC_Configuration(void)
    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 for PWA
 
    RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // enable USART2 clock
+
+   RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 clock
 }
 /*Inicializace GPIO*/
 static void GPIO_Configuration(void)
@@ -116,13 +120,17 @@ static void GPIO_Configuration(void)
    GPIOA->CRL &= 0xFFFFFFF0;
    GPIOA->CRL |= 0x4; // PA0 jako Floating input
 
-   /* Configure PA2 (USART2 TX): alternate func. output Push-pull, 10MHz */
+   /* Configure PA1 (TIM2_CH2): alternate func. output push-pull, 50MHz */
    GPIOA->CRL &= 0xFFFFFF0F;
-   GPIOA->CRL |= 0x000000C0;
+   GPIOA->CRL |= 0x000000B0;
 
-   /* Configure PA3 (USART2 RX): floating input */
+   /* Configure PA2 (USART2 TX): alternate func. output Push-pull, 10MHz */
    GPIOA->CRL &= 0xFFFFF0FF;
    GPIOA->CRL |= 0x00000B00;
+
+   // /* Configure PA3 (USART2 RX): floating input */
+   GPIOA->CRL &= 0xFFFF0FFF;
+   GPIOA->CRL |= 0x00004000;
 }
 
 /* Wait loop delays program flow for about nCount ticks */
@@ -153,6 +161,8 @@ static void USART2_Configuration(void)
    USART2->CR1 |= USART_CR1_UE;
 }
 
+static void TIM2_Configuration(void) {}
+
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)
 {
    /* Is Transmit Data Register Empty */
@@ -181,6 +191,6 @@ static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx)
    }
 }
 
-static void blueLedOn() { GPIOC->BSRR |= 0x100; }
+static void blue_led_on() { GPIOC->BSRR |= 0x100; }
 
-static void blueLedOff() { GPIOC->BSRR |= 0x1000000; }
+static void blue_led_off() { GPIOC->BSRR |= 0x1000000; }

@@ -23,6 +23,7 @@ static void Delay(vu32 nCount);
 static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
 static void TIM2_configuration_PWM(void);
+static void AD1_configuration(void);
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
 /**
  * @brief Function turns on blue led light
@@ -49,6 +50,7 @@ int main(void)
    GPIO_Configuration(); // inicializace GPIO
    USART2_Configuration();
    TIM2_configuration_PWM();
+   AD1_configuration();
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -58,6 +60,8 @@ int main(void)
    /*Nekonecna smycka*/
    while (1) {
       tmp = USART_WaitToReceivedData(USART2);
+
+      USART_SendData(USART2, tmp);
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
          blue_led_on();
 
@@ -109,6 +113,8 @@ static void RCC_Configuration(void)
    RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // enable USART2 clock
 
    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 clock
+
+   RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // enable DAC1 clock
 }
 /*Inicializace GPIO*/
 static void GPIO_Configuration(void)
@@ -129,9 +135,13 @@ static void GPIO_Configuration(void)
    GPIOA->CRL &= 0xFFFFF0FF;
    GPIOA->CRL |= 0x00000B00;
 
-   // /* Configure PA3 (USART2 RX): floating input */
+   /* Configure PA3 (USART2 RX): floating input */
    GPIOA->CRL &= 0xFFFF0FFF;
    GPIOA->CRL |= 0x00004000;
+
+   /* Configure PC0 (ADC1_IN10): Analog input */
+   GPIOC->CRL &= 0xFFFFFFF0;
+   GPIOC->CRL |= 0x00000000;
 }
 
 /* Wait loop delays program flow for about nCount ticks */
@@ -164,25 +174,23 @@ static void USART2_Configuration(void)
 
 static void TIM2_configuration_PWM(void)
 {
-   TIM2->CR1 = 0x0080;
-   TIM2->CCMR1 = 0x6800;
+   TIM2->CR1 = 0x0080;   // turn of ARPE bit
+   TIM2->CCMR1 = 0x6800; // config channel 2
    TIM2->CCER = 0x1;
    TIM2->PSC = 0;
-   TIM2->ARR = 24000;
-   TIM2->CCR2 = 12000;
+   TIM2->ARR = 23999 / 5;  // set frequency
+   TIM2->CCR2 = 12000 / 5; // set dutycycle
    TIM2->CR1 |= 0x1;
+   TIM2->CCER |= TIM_CCER_CC2E;
+}
 
-   // TIM2->TIM_ARR_ARR = 0x0100;   // determined frequency
-   // TIM2->TIM_CCR2_CCR2 = 0x1388; // duty cycle 50%
-
-   // TIM2->TIM_PSC_PSC = 0x0001; // delicka fCK_PSC/(PSC[15:0] + 1), deleno 2
-
-   //    TIM2->TIM_CCMR1_OC2PE = 0x1;  // enable preload
-   // TIM2->TIM_CCMR1_OC2M_0 = 0x0; // output compare mode
-   // TIM2->TIM_CCMR1_OC2M_1 = 0x1; // output compare mode
-   // TIM2->TIM_CCMR1_OC2M_2 = 0x1; // output compare mode
-
-   // TIM2->TIM_CR1_CEN = 0x1; // enable TIM2
+static void AD1_configuration(void)
+{
+   ADC1->CR2 |= 0xE0000;
+   ADC1->SMPR2 |= 0x200;
+   ADC1->SQR3 |= 0xA;
+   ADC1->CR2 |= 0x9;
+   ADC1->CR2 |= 0x4;
 }
 
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)

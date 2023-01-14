@@ -1,13 +1,7 @@
-//;***************************************************************************************************
-//;*
-//;* Misto			: CVUT FEL, Katedra Mereni
-//;* Prednasejici		: Doc. Ing. Jan Fischer,CSc.
-//;* Predmet			: A4B38NVS
-//;* Vyvojovy Kit		: STM32 VL DISCOVERY (STM32F100RB)
-//;*
-//;**************************************************************************************************
-
 #include "stm32f10x.h"
+
+#define DISPLAY_WIDTH 128
+#define DISPLAY_HIGHT 64
 
 /*Definitions*/
 

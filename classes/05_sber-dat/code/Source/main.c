@@ -130,19 +130,30 @@ static void GPIO_Configuration(void)
    GPIOA->CRL &= 0xFFFFFFF0;
    GPIOA->CRL |= 0x4; // PA0 jako Floating input
 
-   /* Configure PA1 (TIM2_CH2): alternate func. output push-pull, 50MHz */
+   /*Details on how to connect the peripheral are specified in doc on the
+      page 110 (Asstes\RM0041_reference_manual_ARMSTM32F100xx.pdf). */
+
+   // Configure PA1 (TIM2_CH2): alternate func. output push-pull, 50MHz
    GPIOA->CRL &= 0xFFFFFF0F;
    GPIOA->CRL |= 0x000000B0;
 
-   /* Configure PA2 (USART2 TX): alternate func. output Push-pull, 50MHz */
+   // Configure PA2 (USART2 TX): alternate func. output Push-pull, 50MHz
    GPIOA->CRL &= 0xFFFFF0FF;
    GPIOA->CRL |= 0x00000B00;
 
-   /* Configure PA3 (USART2 RX): floating input */
+   // Configure PA3 (USART2 RX): floating input
    GPIOA->CRL &= 0xFFFF0FFF;
    GPIOA->CRL |= 0x00004000;
 
-   /* Configure PC0 (ADC1_IN10): Analog input */
+   // PC11 I2Cx_SDA I2C Data I/O Alternate function open drain (11), 10MHz (01)
+   GPIOC->CRH &= 0xFFFF0FFF;
+   GPIOC->CRH |= 0x0000D000;
+
+   // PC10 I2Cx_SCL I2C clock Alternate function open drain (11), 10MHz (01)
+   GPIOC->CRH &= 0xFFFFF0FF;
+   GPIOC->CRH |= 0x00000D00;
+
+   // Configure PC0 (ADC1_IN10): Analog input
    GPIOC->CRL &= 0xFFFFFFF0;
    GPIOC->CRL |= 0x00000000;
 }

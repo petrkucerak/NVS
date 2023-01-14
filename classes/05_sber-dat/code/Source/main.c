@@ -106,6 +106,7 @@ static void RCC_Configuration(void)
    }
    /* Peripheral clock enable */
    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN; // enable PA
+   RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; // enable PB gated
    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN; // enable PC
 
    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 for PWA

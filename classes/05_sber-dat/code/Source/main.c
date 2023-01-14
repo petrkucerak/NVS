@@ -114,6 +114,8 @@ static void RCC_Configuration(void)
 
    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 clock
 
+   RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; // enable I2C_2 clock
+
    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // enable DAC1 clock
 }
 /*Inicializace GPIO*/

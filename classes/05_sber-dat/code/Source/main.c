@@ -2,6 +2,7 @@
 
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HIGHT 64
+#define OLED_I2C_ADDRESS 0x3C
 
 /*Definitions*/
 
@@ -18,6 +19,8 @@ static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
 static void TIM2_configuration_PWM(void);
 static void AD1_configuration(void);
+static void I2C_configuration(void);
+static void I2C_SendData(uint8_t target, uint8_t data);
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
 /**
  * @brief Function turns on blue led light
@@ -45,6 +48,7 @@ int main(void)
    USART2_Configuration();
    TIM2_configuration_PWM();
    AD1_configuration();
+   I2C_configuration();
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -190,6 +194,22 @@ static void TIM2_configuration_PWM(void)
    TIM2->CCR2 = 12000 / 5; // set dutycycle
    TIM2->CR1 |= 0x1;
    TIM2->CCER |= TIM_CCER_CC2E;
+}
+
+static void I2C_configuration(void)
+{
+   // Program the peripheral input clock in I2C_CR2 Register in order to
+   // generate correct timings
+   I2C2->CR2 |= 0x2; //  2 MHz in Standard mode
+
+   // Configure the clock control registers
+   I2C2->CCR |= 0x28; // SCL frequency 100kHz, Standart mode (doc. page 563)
+
+   // Configure the rise time register
+   I2C2->TRISE = 0x0002; // set the reset value
+
+   // Program the I2C_CR1 register to enable the peripheral
+   I2C2->CR1 |= 0x1;
 }
 
 static void AD1_configuration(void)

@@ -11,10 +11,10 @@
 
 /*Global variables*/
 uint16_t tmp;
-char *welcome = "The start of measuring!\n";
+uint8_t tmp8;
+char *welcome = "The start of measuring!";
+char *nums = "123456789";
 uint16_t i;
-uint16_t data[] = {0xAF, 0xA7};
-uint16_t size = 1;
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -59,11 +59,19 @@ int main(void)
    TIM2_configuration_PWM();
    AD1_configuration();
 
+   printU(nums, 1, USART2);
    I2C_init();
+   printU(nums, 1, USART2);
+   I2C_start();
+   printU(nums, 1, USART2);
    I2C_address(0x79);
+   printU(nums, 1, USART2);
    I2C_write(0xA7);
+   printU(nums, 1, USART2);
    I2C_write(0xAF);
+   printU(nums, 1, USART2);
    I2C_stop();
+   printU(nums, 1, USART2);
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -160,11 +168,11 @@ static void GPIO_Configuration(void)
 
    // PC11 I2Cx_SDA I2C Data I/O Alternate function open drain (11), 10MHz (01)
    GPIOC->CRH &= 0xFFFF0FFF;
-   GPIOC->CRH |= 0x0000D000;
+   GPIOC->CRH |= 0x0000F000;
 
    // PC10 I2Cx_SCL I2C clock Alternate function open drain (11), 10MHz (01)
    GPIOC->CRH &= 0xFFFFF0FF;
-   GPIOC->CRH |= 0x00000D00;
+   GPIOC->CRH |= 0x00000F00;
 
    // Configure PC0 (ADC1_IN10): Analog input
    GPIOC->CRL &= 0xFFFFFFF0;
@@ -213,18 +221,20 @@ static void TIM2_configuration_PWM(void)
 
 static void I2C_init(void)
 {
-   I2C2->CR1 |= I2C_CR1_SWRST; // reset
-   Delay(1);
-   I2C2->CR1 = 0x0; // reset
+   I2C2->CR1 |= I2C_CR1_SWRST; // Reset the I2C
+   I2C2->CR1 &= ~(1 << 15);    // Normal operation
    // Program the peripheral input clock in I2C_CR2 Register in order to
    // generate correct timings
    I2C2->CR2 |= 0x2; //  2 MHz in Standard mode
 
    // Configure the clock control registers
-   I2C2->CCR |= 0x64; // SCL frequency 100kHz, Standart mode (doc. page 563)
+   I2C2->CCR |= 0x78;
+   // https://controllerstech.com/stm32-i2c-configuration-using-registers/
+   // CCR = (4μs + 1000 ns) / (1/24 MHz) = 120 = 0x78
 
    // Configure the rise time register
-   I2C2->TRISE = (24000000 / 0x64) + 1; // set the reset value
+   I2C2->TRISE = 0x19; // set the reset value
+   // TRISE = (1000 ns / (1/24 MHzs)) + 1 = 25 = 0x19
 
    // Program the I2C_CR1 register to enable the peripheral
    I2C2->CR1 |= 0x1;
@@ -233,7 +243,7 @@ static void I2C_start(void)
 {
    I2C2->CR1 |= I2C_CR1_ACK;   // Enable the ACK
    I2C2->CR1 |= I2C_CR1_START; // Send the START condition
-   while (!(I2C2->SR1 & (1)))
+   while (!(I2C2->SR1 & (1 << 0)))
       ; // Wait for the SB ( Bit 0 in SR1) to set
 }
 static void I2C_write(uint16_t data)
@@ -241,16 +251,15 @@ static void I2C_write(uint16_t data)
    while (!(I2C2->SR1 & (1 << 7)))
       ; // wait for TXE bit to set
    I2C2->DR = data;
-   while (!(I2C @->SR1 & (1 << 2)))
+   while (!(I2C2->SR1 & (1 << 2)))
       ; // wait for BTF bit to set
 }
 static void I2C_address(uint16_t target)
 {
    I2C2->DR = target; // send the address
    while (!(I2C2->SR1 & (1 << 1)))
-      ; // wait for ADDR bit to set
-   uint8_t tmp =
-       I2C2->SR1 | I2C2->SR2; // read SR1 and SR2 to clear the ADDR bit
+      ;                          // wait for ADDR bit to set
+   tmp8 = I2C2->SR1 | I2C2->SR2; // read SR1 and SR2 to clear the ADDR bit
 }
 static void I2C_stop(void)
 {

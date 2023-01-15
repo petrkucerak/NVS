@@ -2,14 +2,19 @@
 
 #define DISPLAY_WIDTH 128
 #define DISPLAY_HIGHT 64
-#define OLED_I2C_ADDRESS 0x3C
+// #define OLED_I2C_ADDRESS 0x78 // real value is 0x3C, this is for aligning
+#define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
+
+#define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
 
 /*Definitions*/
 
 /*Global variables*/
 uint16_t tmp;
 char *welcome = "The start of measuring!\n";
-uint8_t i;
+uint16_t i;
+uint16_t data[] = {0xAF, 0xA7};
+uint16_t size = 1;
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -19,8 +24,13 @@ static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
 static void TIM2_configuration_PWM(void);
 static void AD1_configuration(void);
-static void I2C_configuration(void);
-static void I2C_SendData(uint8_t target, uint8_t data);
+// I2C functions
+static void I2C_init(void);
+static void I2C_start(void);
+static void I2C_write(uint16_t data);
+static void I2C_address(uint16_t target);
+static void I2C_stop(void);
+
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
 /**
  * @brief Function turns on blue led light
@@ -48,7 +58,12 @@ int main(void)
    USART2_Configuration();
    TIM2_configuration_PWM();
    AD1_configuration();
-   I2C_configuration();
+
+   I2C_init();
+   I2C_address(0x79);
+   I2C_write(0xA7);
+   I2C_write(0xAF);
+   I2C_stop();
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -104,7 +119,7 @@ static void RCC_Configuration(void)
    }
    /* Peripheral clock enable */
    RCC->APB2ENR |= RCC_APB2ENR_IOPAEN; // enable PA
-   RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; // enable PB gated
+   RCC->APB2ENR |= RCC_APB2ENR_IOPBEN; // enable PB gates
    RCC->APB2ENR |= RCC_APB2ENR_IOPCEN; // enable PC
 
    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 for PWA
@@ -196,20 +211,52 @@ static void TIM2_configuration_PWM(void)
    TIM2->CCER |= TIM_CCER_CC2E;
 }
 
-static void I2C_configuration(void)
+static void I2C_init(void)
 {
+   I2C2->CR1 |= I2C_CR1_SWRST; // reset
+   Delay(1);
+   I2C2->CR1 = 0x0; // reset
    // Program the peripheral input clock in I2C_CR2 Register in order to
    // generate correct timings
    I2C2->CR2 |= 0x2; //  2 MHz in Standard mode
 
    // Configure the clock control registers
-   I2C2->CCR |= 0x28; // SCL frequency 100kHz, Standart mode (doc. page 563)
+   I2C2->CCR |= 0x64; // SCL frequency 100kHz, Standart mode (doc. page 563)
 
    // Configure the rise time register
-   I2C2->TRISE = 0x0002; // set the reset value
+   I2C2->TRISE = (24000000 / 0x64) + 1; // set the reset value
 
    // Program the I2C_CR1 register to enable the peripheral
    I2C2->CR1 |= 0x1;
+}
+static void I2C_start(void)
+{
+   I2C2->CR1 |= I2C_CR1_ACK;   // Enable the ACK
+   I2C2->CR1 |= I2C_CR1_START; // Send the START condition
+   while (!(I2C2->SR1 & (1)))
+      ; // Wait for the SB ( Bit 0 in SR1) to set
+}
+static void I2C_write(uint16_t data)
+{
+   while (!(I2C2->SR1 & (1 << 7)))
+      ; // wait for TXE bit to set
+   I2C2->DR = data;
+   while (!(I2C @->SR1 & (1 << 2)))
+      ; // wait for BTF bit to set
+}
+static void I2C_address(uint16_t target)
+{
+   I2C2->DR = target; // send the address
+   while (!(I2C2->SR1 & (1 << 1)))
+      ; // wait for ADDR bit to set
+   uint8_t tmp =
+       I2C2->SR1 | I2C2->SR2; // read SR1 and SR2 to clear the ADDR bit
+}
+static void I2C_stop(void)
+{
+   I2C2->CR1 |= I2C_CR1_STOP;
+   while (!(I2C2->SR1 & (1 << 4)))
+      ;
 }
 
 static void AD1_configuration(void)

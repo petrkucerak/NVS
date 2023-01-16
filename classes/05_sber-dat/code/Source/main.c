@@ -232,7 +232,7 @@ static void TIM3_configuration(void)
    TIM3->SMCR |= 0x1; // Connect with TIM2
    TIM3->SMCR |= 0x4; // Turn on the Reset mode
 
-   TIM3->CR2 |= 0x0; // Master mode selection: Reset
+   TIM3->CR2 |= TIM_CR2_MMS_0; // Master mode selection: Eneable
 
    TIM3->CR1 |= TIM_CR1_CEN; // Start the timer 3
 }

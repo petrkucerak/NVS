@@ -319,15 +319,15 @@ static void AD1_configuration(void)
 static void DMA_configuration(void)
 {
    // DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
-   DMA1->CRR1 |= DMA_CCR1_MSIZE_0; // Memory size
-   DMA1->CRR1 |= DMA_CCR1_PSIZE_0; // Peripheral size
-   DMA1->CRR1 |= DMA_CCR1_MINC;    // Memory increment mode
+   DMA1->CCR1 |= DMA_CCR1_MSIZE_0; // Memory size
+   DMA1->CCR1 |= DMA_CCR1_PSIZE_0; // Peripheral size
+   DMA1->CCR1 |= DMA_CCR1_MINC;    // Memory increment mode
 
    DMA1->CNDTR1 = DATA_SIZE; // Count of elelement to transfer
    DMA1->CPAR1 = &values;
    DMA1->CMAR1 = &values;
 
-   DMA1->CRR1 |= DMA_CCR1_EN; // Start DMA
+   DMA1->CCR1 |= DMA_CCR1_EN; // Start DMA
 }
 
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)

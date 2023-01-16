@@ -340,8 +340,8 @@ static void DMA_configuration(void)
    DMA1->CCR1 |= DMA_CCR1_CIRC;    // Use array as circual
 
    DMA1->CNDTR1 = DATA_SIZE; // Count of elelement to transfer
-   DMA1->CPAR1 = *values;
-   DMA1->CMAR1 = *values;
+   DMA1->CPAR1 = ADC1->DR;
+   DMA1->CMAR1 = (uint32_t)values;
 
    DMA1->CCR1 |= DMA_CCR1_EN; // Start DMA
 }

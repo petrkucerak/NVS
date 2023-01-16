@@ -227,6 +227,7 @@ static void TIM3_configuration(void)
    TIM3->CR1 = 0x0080;      // turn of ARPE bit
    TIM3->ARR = 23999 / 25;  // set frequency
    TIM3->CCR2 = 12000 / 25; // set dutycycle
+   TIM3->PSC = 0x0;
    TIM3->CCMR1 |= 0x1;
    // shut run in the slave reste mode
    TIM3->SMCR |= 0x1; // Connect with TIM2

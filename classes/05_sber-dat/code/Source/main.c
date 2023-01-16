@@ -305,7 +305,7 @@ static void I2C_stop(void)
 
 static void AD1_configuration(void)
 {
-   // RCC->CFGR |= RCC_CFGR_ADCPRE_DIV6; // Prescale 6 ADC_CLK 24/6 = 8 MHz
+   
 
    ADC1->CR1 |= ADC_CR1_DISCEN;   // nespojity mod
    ADC1->CR2 |= ADC_CR2_EXTTRIG;  // turn on extern trigger
@@ -317,16 +317,12 @@ static void AD1_configuration(void)
    ADC1->SQR1 = 0x0;   // No chanels conversion
    ADC1->SQR3 = 0x0;
 
-   ADC1->CR2 |= 0x01; // Turn on ADC1
-
-   // ADC1->CR2 |= ADC_CR2_RSTCAL; // Reset the calibration
-   // while (!(ADC1->CR2 & ADC_CR2_RSTCAL))
-   //    ;
-
    ADC1->CR2 |= 0x04; // Turn on autocalibration
    while (!(ADC1->CR2 & 0x04))
       ;
    // wait for autocalibration
+
+   ADC1->CR2 |= 0x01; // Turn on ADC1
 }
 
 static void DMA_configuration(void)

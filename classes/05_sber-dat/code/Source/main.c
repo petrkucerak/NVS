@@ -247,7 +247,8 @@ static void TIM3_configuration(void)
    // shut run in the slave reste mode
    TIM3->SMCR |= 0x4; // Turn on the Reset mode and Connect with TIM2
 
-   TIM3->CR2 |= TIM_CR2_MMS_0; // Master mode selection: Eneable
+   // TIM3->CR2 |= TIM_CR2_MMS_0; // Master mode selection: Eneable
+   TIM3->CR2 |= TIM_CR2_MMS_1; // update
 
    TIM3->CR1 |= TIM_CR1_CEN; // Start the timer 3
 }
@@ -305,7 +306,6 @@ static void I2C_stop(void)
 
 static void AD1_configuration(void)
 {
-   
 
    ADC1->CR1 |= ADC_CR1_DISCEN;   // nespojity mod
    ADC1->CR2 |= ADC_CR2_EXTTRIG;  // turn on extern trigger
@@ -315,7 +315,8 @@ static void AD1_configuration(void)
 
    ADC1->SMPR1 |= 0x2; // On channel 10 set sample time 13.5 cycles
    ADC1->SQR1 = 0x0;   // No chanels conversion
-   ADC1->SQR3 = 0x0;
+   ADC1->SQR2 = 0x0;   // No chanels
+   ADC1->SQR3 = 0xA;   // Used one channel 10
 
    ADC1->CR2 |= 0x04; // Turn on autocalibration
    while (!(ADC1->CR2 & 0x04))

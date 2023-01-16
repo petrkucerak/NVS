@@ -4,7 +4,7 @@
 #define DISPLAY_HIGHT 64
 // #define OLED_I2C_ADDRESS 0x78 // real value is 0x3C, this is for aligning
 #define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
-#define DATA_SIZE 1000
+#define DATA_SIZE 10
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
 #define NULL ((uint16_t *)0)
 
@@ -86,6 +86,8 @@ int main(void)
    USART_SendData(USART2, '\r');
    USART_SendData(USART2, '\n');
    printU(welcome, 24, USART2);
+   USART_SendData(USART2, '\r');
+   USART_SendData(USART2, '\n');
 
    /*Nekonecna smycka*/
    while (1) {
@@ -237,14 +239,13 @@ static void TIM2_configuration_PWM(void)
 
 static void TIM3_configuration(void)
 {
-   TIM3->CR1 = 0x0080;      // turn of ARPE bit
-   TIM3->ARR = 23999 / 50;  // set frequency
-   TIM3->CCR2 = 12000 / 50; // set dutycycle
+   TIM3->CR1 = 0x0080;       // turn of ARPE bit
+   TIM3->ARR = 23999 / 100;  // set frequency
+   TIM3->CCR2 = 12000 / 100; // set dutycycle
    TIM3->PSC = 0x0;
    TIM3->CCMR1 |= 0x1;
    // shut run in the slave reste mode
-   TIM3->SMCR |= 0x1; // Connect with TIM2
-   TIM3->SMCR |= 0x4; // Turn on the Reset mode
+   TIM3->SMCR |= 0x4; // Turn on the Reset mode and Connect with TIM2
 
    TIM3->CR2 |= TIM_CR2_MMS_0; // Master mode selection: Eneable
 
@@ -270,6 +271,8 @@ static void I2C_init(void)
 
    // Program the I2C_CR1 register to enable the peripheral
    I2C2->CR1 |= 0x1;
+
+   Delay(100);
 }
 static void I2C_start(void)
 {

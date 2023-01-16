@@ -6,6 +6,7 @@
 #define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
 #define DATA_SIZE 1000
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
+#define NULL ((uint16_t *)0)
 
 /*Definitions*/
 
@@ -15,7 +16,7 @@ uint8_t tmp8;
 char *welcome = "The start of measuring!";
 char *nums = "123456789";
 uint16_t i;
-uint16_t values[DATA_SIZE];
+uint16_t *values = NULL;
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -318,6 +319,13 @@ static void AD1_configuration(void)
 
 static void DMA_configuration(void)
 {
+
+   // Allocated data
+   values = (uint16_t *)malloc(sizeof(uint16_t) * DATA_SIZE);
+   if (values == NULL) {
+      // TODO: handle an error
+   }
+
    // TODO: Try to find a correct DMA1 address
    //  DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
    DMA1->CCR1 |= DMA_CCR1_MSIZE_0; // Memory size
@@ -325,8 +333,8 @@ static void DMA_configuration(void)
    DMA1->CCR1 |= DMA_CCR1_MINC;    // Memory increment mode
 
    DMA1->CNDTR1 = DATA_SIZE; // Count of elelement to transfer
-   DMA1->CPAR1 = &values;
-   DMA1->CMAR1 = &values;
+   DMA1->CPAR1 = *values;
+   DMA1->CMAR1 = *values;
 
    DMA1->CCR1 |= DMA_CCR1_EN; // Start DMA
 }

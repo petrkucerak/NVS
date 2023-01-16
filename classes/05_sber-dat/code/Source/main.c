@@ -247,8 +247,8 @@ static void TIM3_configuration(void)
    // shut run in the slave reste mode
    TIM3->SMCR |= 0x4; // Turn on the Reset mode and Connect with TIM2
 
-   // TIM3->CR2 |= TIM_CR2_MMS_0; // Master mode selection: Eneable
-   TIM3->CR2 |= TIM_CR2_MMS_1; // update
+   TIM3->CR2 |= TIM_CR2_MMS_1; // The update mode
+   TIM3->DIER |= TIM_DIER_UIE; // Update Interrupt Enable
 
    TIM3->CR1 |= TIM_CR1_CEN; // Start the timer 3
 }
@@ -307,11 +307,11 @@ static void I2C_stop(void)
 static void AD1_configuration(void)
 {
 
-   ADC1->CR1 |= ADC_CR1_DISCEN;   // nespojity mod
-   ADC1->CR2 |= ADC_CR2_EXTTRIG;  // turn on extern trigger
-   ADC1->CR2 |= ADC_CR2_EXTSEL_2; //  Timer 3 TRGO event
+   ADC1->CR1 |= ADC_CR1_DISCEN;   // Nespojity mod
+   ADC1->CR2 |= ADC_CR2_EXTTRIG;  // Turn on extern trigger
+   ADC1->CR2 |= ADC_CR2_EXTSEL_2; // Timer 3 TRGO event
    ADC1->CR2 |= ADC_CR2_DMA;      // Turn on DMA
-   ADC1->CR2 |= ADC_CR2_CONT;     // Turn on continuous conversion
+   // ADC1->CR2 |= ADC_CR2_CONT;     // Turn on continuous conversion
 
    ADC1->SMPR1 |= 0x2; // On channel 10 set sample time 13.5 cycles
    ADC1->SQR1 = 0x0;   // No chanels conversion
@@ -324,6 +324,10 @@ static void AD1_configuration(void)
    // wait for autocalibration
 
    ADC1->CR2 |= 0x01; // Turn on ADC1
+
+   Delay(1000);
+   ADC1->SR = 0;                 // Clear the status registere
+   ADC1->CR2 |= ADC_CR2_SWSTART; // Start a conversion
 }
 
 static void DMA_configuration(void)
@@ -333,6 +337,7 @@ static void DMA_configuration(void)
    DMA1->CCR1 |= DMA_CCR1_MSIZE_0; // Memory size
    DMA1->CCR1 |= DMA_CCR1_PSIZE_0; // Peripheral size
    DMA1->CCR1 |= DMA_CCR1_MINC;    // Memory increment mode
+   DMA1->CCR1 |= DMA_CCR1_CIRC;    // Use array as circual
 
    DMA1->CNDTR1 = DATA_SIZE; // Count of elelement to transfer
    DMA1->CPAR1 = *values;

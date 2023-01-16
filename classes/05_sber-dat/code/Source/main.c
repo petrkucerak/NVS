@@ -4,7 +4,7 @@
 #define DISPLAY_HIGHT 64
 // #define OLED_I2C_ADDRESS 0x78 // real value is 0x3C, this is for aligning
 #define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
-#define DATA_SIZE 10
+#define DATA_SIZE 100
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
 #define NULL ((uint16_t *)0)
 
@@ -339,9 +339,9 @@ static void DMA_configuration(void)
    DMA1->CCR1 |= DMA_CCR1_MINC;    // Memory increment mode
    DMA1->CCR1 |= DMA_CCR1_CIRC;    // Use array as circual
 
-   DMA1->CNDTR1 = DATA_SIZE; // Count of elelement to transfer
-   DMA1->CPAR1 = ADC1->DR;
-   DMA1->CMAR1 = (uint32_t)values;
+   DMA1->CNDTR1 = DATA_SIZE;        // Count of elelement to transfer
+   DMA1->CPAR1 = 0x40012400 + 0x4C; // Address of peripherals
+   DMA1->CMAR1 = (uint32_t)values;  // Address of target array
 
    DMA1->CCR1 |= DMA_CCR1_EN; // Start DMA
 }

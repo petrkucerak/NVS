@@ -4,7 +4,7 @@
 #define DISPLAY_HIGHT 64
 // #define OLED_I2C_ADDRESS 0x78 // real value is 0x3C, this is for aligning
 #define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
-#define DATA_SIZE 100
+#define DATA_SIZE 1000
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
 #define NULL ((uint16_t *)0)
 
@@ -66,19 +66,19 @@ int main(void)
    AD1_configuration();
    DMA_configuration();
 
-   // printU(nums, 1, USART2);
-   // I2C_init();
-   // printU(nums, 1, USART2);
-   // I2C_start();
-   // printU(nums, 1, USART2);
-   // I2C_address(0x79);
-   // printU(nums, 1, USART2);
-   // I2C_write(0xA7);
-   // printU(nums, 1, USART2);
-   // I2C_write(0xAF);
-   // printU(nums, 1, USART2);
-   // I2C_stop();
-   // printU(nums, 1, USART2);
+   printU(nums, 1, USART2);
+   I2C_init();
+   printU(nums, 1, USART2);
+   I2C_start();
+   printU(nums, 1, USART2);
+   I2C_address(0x79);
+   printU(nums, 1, USART2);
+   I2C_write(0xA7);
+   printU(nums, 1, USART2);
+   I2C_write(0xAF);
+   printU(nums, 1, USART2);
+   I2C_stop();
+   printU(nums, 1, USART2);
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -157,6 +157,8 @@ static void RCC_Configuration(void)
    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // enable ADC1 clock
 
    RCC->AHBENR |= RCC_AHBENR_DMA1EN; // enable DMA1 clock
+
+   RCC->APB2ENR |= RCC_APB2ENR_AFIOEN; // alternative functions clock
 }
 /*Inicializace GPIO*/
 static void GPIO_Configuration(void)
@@ -239,9 +241,9 @@ static void TIM2_configuration_PWM(void)
 
 static void TIM3_configuration(void)
 {
-   TIM3->CR1 = 0x0080;       // turn of ARPE bit
-   TIM3->ARR = 23999 / 100;  // set frequency
-   TIM3->CCR2 = 12000 / 100; // set dutycycle
+   TIM3->CR1 = 0x0080;        // turn of ARPE bit
+   TIM3->ARR = 23999 / 2000;  // set frequency
+   TIM3->CCR2 = 12000 / 2000; // set dutycycle
    TIM3->PSC = 0x0;
    TIM3->CCMR1 |= 0x1;
    // shut run in the slave reste mode
@@ -255,8 +257,8 @@ static void TIM3_configuration(void)
 
 static void I2C_init(void)
 {
-   I2C2->CR1 |= I2C_CR1_SWRST; // Reset the I2C
-   I2C2->CR1 &= ~(1 << 15);    // Normal operation
+   I2C2->CR1 |= I2C_CR1_SWRST;  // Reset the I2C
+   I2C2->CR1 &= ~I2C_CR1_SWRST; // Normal operation
    // Program the peripheral input clock in I2C_CR2 Register in order to
    // generate correct timings
    I2C2->CR2 |= 0x2; //  2 MHz in Standard mode
@@ -269,6 +271,15 @@ static void I2C_init(void)
    // Configure the rise time register
    I2C2->TRISE = 0x19; // set the reset value
    // TRISE = (1000 ns / (1/24 MHzs)) + 1 = 25 = 0x19
+
+   // Eneable interupts
+   I2C2->CR2 |= I2C_CR2_ITEVTEN;
+   I2C2->CR2 |= I2C_CR2_ITERREN;
+   I2C2->CR2 |= I2C_CR2_ITBUFEN;
+   I2C2->CR2 |= I2C_CR2_DMAEN; // eneable DMA request
+
+   // Set own I2C address
+   I2C2->OAR1 |= 0x7A;
 
    // Program the I2C_CR1 register to enable the peripheral
    I2C2->CR1 |= 0x1;
@@ -340,7 +351,7 @@ static void DMA_configuration(void)
    DMA1->CCR1 |= DMA_CCR1_CIRC;    // Use array as circual
 
    DMA1->CNDTR1 = DATA_SIZE;        // Count of elelement to transfer
-   DMA1->CPAR1 = 0x40012400 + 0x4C; // Address of peripherals
+   DMA1->CPAR1 = 0x40012400 + 0x4C; // Address of peripherals (ADC1->DR)
    DMA1->CMAR1 = (uint32_t)values;  // Address of target array
 
    DMA1->CCR1 |= DMA_CCR1_EN; // Start DMA

@@ -62,6 +62,7 @@ int main(void)
    TIM2_configuration_PWM();
    TIM3_configuration();
    AD1_configuration();
+   DMA_configuration();
 
    // printU(nums, 1, USART2);
    // I2C_init();

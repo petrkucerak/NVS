@@ -16,7 +16,7 @@ uint8_t tmp8;
 char *welcome = "The start of measuring!";
 char *nums = "123456789";
 uint16_t i;
-uint16_t *values = NULL;
+uint16_t values[DATA_SIZE];
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -85,14 +85,14 @@ int main(void)
 
    USART_SendData(USART2, '\r');
    USART_SendData(USART2, '\n');
-   printU(welcome, 25, USART2);
+   printU(welcome, 24, USART2);
 
    /*Nekonecna smycka*/
    while (1) {
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
          blue_led_on();
 
-         for (i = 0; i < 150; ++i) {
+         for (i = 0; i < DATA_SIZE; ++i) {
             printUint16(i, USART2);
             USART_SendData(USART2, '.');
             USART_SendData(USART2, ' ');
@@ -328,33 +328,6 @@ static void AD1_configuration(void)
 
 static void DMA_configuration(void)
 {
-
-   // Allocated data
-   values = (uint16_t *)malloc(sizeof(uint16_t) * DATA_SIZE);
-   if (values == NULL) {
-      // TODO: handle an error
-   }
-   for (i = 0; i < 10; ++i) {
-      printUint16(i, USART2);
-      USART_SendData(USART2, '.');
-      USART_SendData(USART2, ' ');
-      printUint16(values[i], USART2);
-      USART_SendData(USART2, '\r');
-      USART_SendData(USART2, '\n');
-   }
-
-   for (i = 0; i < DATA_SIZE; ++i) {
-      *(values + i) = 20;
-   }
-
-   for (i = 0; i < 10; ++i) {
-      printUint16(i, USART2);
-      USART_SendData(USART2, '.');
-      USART_SendData(USART2, ' ');
-      printUint16(values[i], USART2);
-      USART_SendData(USART2, '\r');
-      USART_SendData(USART2, '\n');
-   }
 
    //  DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
    DMA1->CCR1 |= DMA_CCR1_MSIZE_0; // Memory size

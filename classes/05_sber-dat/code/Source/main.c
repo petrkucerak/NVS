@@ -48,6 +48,7 @@ static void blue_led_on(void);
  */
 static void blue_led_off(void);
 static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx);
+static void printUint16(uint16_t number, USART_TypeDef *USARTx);
 
 void SystemInit(void)
 {
@@ -82,15 +83,20 @@ int main(void)
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
 
+   USART_SendData(USART2, '\r');
+   USART_SendData(USART2, '\n');
    printU(welcome, 25, USART2);
 
    /*Nekonecna smycka*/
    while (1) {
-      tmp = (uint16_t)'O';
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
          blue_led_on();
 
-         USART_SendData(USART2, tmp);
+         for (i = 0; i < DATA_SIZE; ++i) {
+            printUint16(values[i], USART2);
+            USART_SendData(USART2, '\r');
+            USART_SendData(USART2, '\n');
+         }
 
       } else {
          blue_led_off();
@@ -325,6 +331,8 @@ static void DMA_configuration(void)
    if (values == NULL) {
       // TODO: handle an error
    }
+   for (i = 0; i < DATA_SIZE; ++i)
+      values[i] = 0;
 
    // TODO: Try to find a correct DMA1 address
    //  DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
@@ -365,6 +373,24 @@ static void printU(char *string, uint8_t tx_ptr, USART_TypeDef *USARTx)
    for (i = 0; i < tx_ptr; ++i) {
       USART_SendData(USARTx, string[i]);
    }
+}
+
+static void printUint16(uint16_t number, USART_TypeDef *USARTx)
+{
+   // 65535
+   tmp = number / (10000);
+   number -= tmp * 10000;
+   USART_SendData(USARTx, (char)(tmp + 48));
+   tmp = number / (1000);
+   number -= tmp * 1000;
+   USART_SendData(USARTx, (char)(tmp + 48));
+   tmp = number / (100);
+   number -= tmp * 100;
+   USART_SendData(USARTx, (char)(tmp + 48));
+   tmp = number / (10);
+   number -= tmp * 10;
+   USART_SendData(USARTx, (char)(tmp + 48));
+   USART_SendData(USARTx, (char)(number + 48));
 }
 
 static void blue_led_on(void) { GPIOC->BSRR |= 0x100; }

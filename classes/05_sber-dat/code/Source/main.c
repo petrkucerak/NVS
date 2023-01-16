@@ -4,7 +4,7 @@
 #define DISPLAY_HIGHT 64
 // #define OLED_I2C_ADDRESS 0x78 // real value is 0x3C, this is for aligning
 #define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
-
+#define DATA_SIZE 1000
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
 
 /*Definitions*/
@@ -15,6 +15,7 @@ uint8_t tmp8;
 char *welcome = "The start of measuring!";
 char *nums = "123456789";
 uint16_t i;
+uint16_t values[DATA_SIZE];
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -25,6 +26,7 @@ static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
 static void TIM2_configuration_PWM(void);
 static void TIM3_configuration(void);
 static void AD1_configuration(void);
+static void DMA_configuration(void);
 // I2C functions
 static void I2C_init(void);
 static void I2C_start(void);
@@ -61,19 +63,19 @@ int main(void)
    TIM3_configuration();
    AD1_configuration();
 
-   printU(nums, 1, USART2);
-   I2C_init();
-   printU(nums, 1, USART2);
-   I2C_start();
-   printU(nums, 1, USART2);
-   I2C_address(0x79);
-   printU(nums, 1, USART2);
-   I2C_write(0xA7);
-   printU(nums, 1, USART2);
-   I2C_write(0xAF);
-   printU(nums, 1, USART2);
-   I2C_stop();
-   printU(nums, 1, USART2);
+   // printU(nums, 1, USART2);
+   // I2C_init();
+   // printU(nums, 1, USART2);
+   // I2C_start();
+   // printU(nums, 1, USART2);
+   // I2C_address(0x79);
+   // printU(nums, 1, USART2);
+   // I2C_write(0xA7);
+   // printU(nums, 1, USART2);
+   // I2C_write(0xAF);
+   // printU(nums, 1, USART2);
+   // I2C_stop();
+   // printU(nums, 1, USART2);
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -82,9 +84,7 @@ int main(void)
 
    /*Nekonecna smycka*/
    while (1) {
-      tmp = USART_WaitToReceivedData(USART2);
-
-      USART_SendData(USART2, tmp);
+      tmp = (uint16_t)'O';
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
          blue_led_on();
 
@@ -142,6 +142,8 @@ static void RCC_Configuration(void)
    RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; // enable I2C_2 clock
 
    RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // enable ADC1 clock
+
+   RCC->AHBENR |= RCC_AHBENR_DMA1EN; // enable DMA1 clock
 }
 /*Inicializace GPIO*/
 static void GPIO_Configuration(void)
@@ -225,8 +227,8 @@ static void TIM2_configuration_PWM(void)
 static void TIM3_configuration(void)
 {
    TIM3->CR1 = 0x0080;      // turn of ARPE bit
-   TIM3->ARR = 23999 / 25;  // set frequency
-   TIM3->CCR2 = 12000 / 25; // set dutycycle
+   TIM3->ARR = 23999 / 50;  // set frequency
+   TIM3->CCR2 = 12000 / 50; // set dutycycle
    TIM3->PSC = 0x0;
    TIM3->CCMR1 |= 0x1;
    // shut run in the slave reste mode
@@ -295,6 +297,7 @@ static void AD1_configuration(void)
    ADC1->CR2 |= ADC_CR2_EXTTRIG;  // turn on extern trigger
    ADC1->CR2 |= ADC_CR2_EXTSEL_2; //  Timer 3 TRGO event
    ADC1->CR2 |= ADC_CR2_DMA;      // Turn on DMA
+   ADC1->CR2 |= ADC_CR2_CONT;     // Turn on continuous conversion
 
    ADC1->SMPR1 |= 0x2; // On channel 10 set sample time 13.5 cycles
    ADC1->SQR1 = 0x0;   // No chanels conversion
@@ -302,14 +305,28 @@ static void AD1_configuration(void)
 
    ADC1->CR2 |= 0x01; // Turn on ADC1
 
-   ADC1->CR2 |= 0x08; // resetovani kalibracnich registru
-   while (!(ADC1->CR2 & 0x08))
-      ;
-   // wait for reset value
-   ADC1->CR2 |= 0x04; // turn on autocalibration
+   // ADC1->CR2 |= ADC_CR2_RSTCAL; // Reset the calibration
+   // while (!(ADC1->CR2 & ADC_CR2_RSTCAL))
+   //    ;
+
+   ADC1->CR2 |= 0x04; // Turn on autocalibration
    while (!(ADC1->CR2 & 0x04))
       ;
    // wait for autocalibration
+}
+
+static void DMA_configuration(void)
+{
+   // DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
+   DMA1->CRR1 |= DMA_CCR1_MSIZE_0; // Memory size
+   DMA1->CRR1 |= DMA_CCR1_PSIZE_0; // Peripheral size
+   DMA1->CRR1 |= DMA_CCR1_MINC;    // Memory increment mode
+
+   DMA1->CNDTR1 = DATA_SIZE; // Count of elelement to transfer
+   DMA1->CPAR1 = &values;
+   DMA1->CMAR1 = &values;
+
+   DMA1->CRR1 |= DMA_CCR1_EN; // Start DMA
 }
 
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)

@@ -232,6 +232,8 @@ static void TIM3_configuration(void)
    TIM3->SMCR |= 0x1; // Connect with TIM2
    TIM3->SMCR |= 0x4; // Turn on the Reset mode
 
+   TIM3->CR2 |= 0x0; // Master mode selection: Reset
+
    TIM3->CR1 |= TIM_CR1_CEN; // Start the timer 3
 }
 
@@ -288,7 +290,25 @@ static void AD1_configuration(void)
 {
    // RCC->CFGR |= RCC_CFGR_ADCPRE_DIV6; // Prescale 6 ADC_CLK 24/6 = 8 MHz
 
-   ADC1->CR1 |= ADC_CR1_DISCEN; // nespojity mod
+   ADC1->CR1 |= ADC_CR1_DISCEN;   // nespojity mod
+   ADC1->CR2 |= ADC_CR2_EXTTRIG;  // turn on extern trigger
+   ADC1->CR2 |= ADC_CR2_EXTSEL_2; //  Timer 3 TRGO event
+   ADC1->CR2 |= ADC_CR2_DMA;      // Turn on DMA
+
+   ADC1->SMPR1 |= 0x2; // On channel 10 set sample time 13.5 cycles
+   ADC1->SQR1 = 0x0;   // No chanels conversion
+   ADC1->SQR3 = 0x0;
+
+   ADC1->CR2 |= 0x01; // Turn on ADC1
+
+   ADC1->CR2 |= 0x08; // resetovani kalibracnich registru
+   while (!(ADC1->CR2 & 0x08))
+      ;
+   // wait for reset value
+   ADC1->CR2 |= 0x04; // turn on autocalibration
+   while (!(ADC1->CR2 & 0x04))
+      ;
+   // wait for autocalibration
 }
 
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)

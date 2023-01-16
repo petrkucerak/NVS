@@ -23,6 +23,7 @@ static void Delay(vu32 nCount);
 static void USART2_Configuration(void);
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data);
 static void TIM2_configuration_PWM(void);
+static void TIM3_configuration(void);
 static void AD1_configuration(void);
 // I2C functions
 static void I2C_init(void);
@@ -57,6 +58,7 @@ int main(void)
    GPIO_Configuration(); // inicializace GPIO
    USART2_Configuration();
    TIM2_configuration_PWM();
+   TIM3_configuration();
    AD1_configuration();
 
    printU(nums, 1, USART2);
@@ -135,10 +137,11 @@ static void RCC_Configuration(void)
    RCC->APB1ENR |= RCC_APB1ENR_USART2EN; // enable USART2 clock
 
    RCC->APB1ENR |= RCC_APB1ENR_TIM2EN; // enable TIM2 clock
+   RCC->APB1ENR |= RCC_APB1ENR_TIM3EN; // enable TIM3 clock
 
    RCC->APB1ENR |= RCC_APB1ENR_I2C2EN; // enable I2C_2 clock
 
-   RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // enable DAC1 clock
+   RCC->APB2ENR |= RCC_APB2ENR_ADC1EN; // enable ADC1 clock
 }
 /*Inicializace GPIO*/
 static void GPIO_Configuration(void)
@@ -211,12 +214,25 @@ static void TIM2_configuration_PWM(void)
 {
    TIM2->CR1 = 0x0080;   // turn of ARPE bit
    TIM2->CCMR1 = 0x6800; // config channel 2
-   TIM2->CCER = 0x1;
    TIM2->PSC = 0;
    TIM2->ARR = 23999 / 5;  // set frequency
    TIM2->CCR2 = 12000 / 5; // set dutycycle
    TIM2->CR1 |= 0x1;
+   // TIM2->SMCR |= TIM_SMCR_MSM; we want synch only 1 slave
    TIM2->CCER |= TIM_CCER_CC2E;
+}
+
+static void TIM3_configuration(void)
+{
+   TIM3->CR1 = 0x0080;      // turn of ARPE bit
+   TIM3->ARR = 23999 / 25;  // set frequency
+   TIM3->CCR2 = 12000 / 25; // set dutycycle
+   TIM3->CCMR1 |= 0x1;
+   // shut run in the slave reste mode
+   TIM3->SMCR |= 0x1; // Connect with TIM2
+   TIM3->SMCR |= 0x4; // Turn on the Reset mode
+
+   TIM3->CR1 |= TIM_CR1_CEN; // Start the timer 3
 }
 
 static void I2C_init(void)
@@ -270,11 +286,9 @@ static void I2C_stop(void)
 
 static void AD1_configuration(void)
 {
-   ADC1->CR2 |= 0xE0000;
-   ADC1->SMPR2 |= 0x200;
-   ADC1->SQR3 |= 0xA;
-   ADC1->CR2 |= 0x9;
-   ADC1->CR2 |= 0x4;
+   // RCC->CFGR |= RCC_CFGR_ADCPRE_DIV6; // Prescale 6 ADC_CLK 24/6 = 8 MHz
+
+   ADC1->CR1 |= ADC_CR1_DISCEN; // nespojity mod
 }
 
 static void USART_SendData(USART_TypeDef *USARTx, uint16_t Data)

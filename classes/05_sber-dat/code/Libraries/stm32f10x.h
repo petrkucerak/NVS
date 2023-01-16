@@ -745,6 +745,18 @@ typedef struct
 {
   __IO uint32_t ISR;
   __IO uint32_t IFCR;
+  // start of my inserts
+  __IO uint32_t CCR1;
+  __IO uint32_t CNDTR1;
+  __IO uint32_t CPAR1;
+  __IO uint32_t CMAR1;
+  __IO uint32_t CCR2;
+  __IO uint32_t CNDTR2;
+  __IO uint32_t CPAR2;
+  __IO uint32_t CMAR2;
+  // end of my inserts
+  // more register address are in manula on the page 157
+  
 } DMA_TypeDef;
 
 /** 

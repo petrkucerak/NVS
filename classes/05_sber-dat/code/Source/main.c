@@ -92,7 +92,10 @@ int main(void)
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
          blue_led_on();
 
-         for (i = 0; i < DATA_SIZE; ++i) {
+         for (i = 0; i < 150; ++i) {
+            printUint16(i, USART2);
+            USART_SendData(USART2, '.');
+            USART_SendData(USART2, ' ');
             printUint16(values[i], USART2);
             USART_SendData(USART2, '\r');
             USART_SendData(USART2, '\n');
@@ -331,10 +334,28 @@ static void DMA_configuration(void)
    if (values == NULL) {
       // TODO: handle an error
    }
-   for (i = 0; i < DATA_SIZE; ++i)
-      values[i] = 0;
+   for (i = 0; i < 10; ++i) {
+      printUint16(i, USART2);
+      USART_SendData(USART2, '.');
+      USART_SendData(USART2, ' ');
+      printUint16(values[i], USART2);
+      USART_SendData(USART2, '\r');
+      USART_SendData(USART2, '\n');
+   }
 
-   // TODO: Try to find a correct DMA1 address
+   for (i = 0; i < DATA_SIZE; ++i) {
+      *(values + i) = 20;
+   }
+
+   for (i = 0; i < 10; ++i) {
+      printUint16(i, USART2);
+      USART_SendData(USART2, '.');
+      USART_SendData(USART2, ' ');
+      printUint16(values[i], USART2);
+      USART_SendData(USART2, '\r');
+      USART_SendData(USART2, '\n');
+   }
+
    //  DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
    DMA1->CCR1 |= DMA_CCR1_MSIZE_0; // Memory size
    DMA1->CCR1 |= DMA_CCR1_PSIZE_0; // Peripheral size

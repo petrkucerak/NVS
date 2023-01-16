@@ -318,7 +318,8 @@ static void AD1_configuration(void)
 
 static void DMA_configuration(void)
 {
-   // DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
+   // TODO: Try to find a correct DMA1 address
+   //  DMA1->CCR1 |= DMA_CCR1_MEM2MEM; // shut be 0
    DMA1->CCR1 |= DMA_CCR1_MSIZE_0; // Memory size
    DMA1->CCR1 |= DMA_CCR1_PSIZE_0; // Peripheral size
    DMA1->CCR1 |= DMA_CCR1_MINC;    // Memory increment mode

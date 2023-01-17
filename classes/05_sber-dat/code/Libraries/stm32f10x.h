@@ -750,10 +750,48 @@ typedef struct
   __IO uint32_t CNDTR1;
   __IO uint32_t CPAR1;
   __IO uint32_t CMAR1;
+
+  __IO uint32_t RESERVED1;
+
   __IO uint32_t CCR2;
   __IO uint32_t CNDTR2;
   __IO uint32_t CPAR2;
   __IO uint32_t CMAR2;
+
+  __IO uint32_t RESERVED2;
+
+  __IO uint32_t CCR3;
+  __IO uint32_t CNDTR3;
+  __IO uint32_t CPAR3;
+  __IO uint32_t CMAR3;
+
+  __IO uint32_t RESERVED3;
+
+  __IO uint32_t CCR4;
+  __IO uint32_t CNDTR4;
+  __IO uint32_t CPAR4;
+  __IO uint32_t CMAR4;
+
+  __IO uint32_t RESERVED4;
+
+  __IO uint32_t CCR5;
+  __IO uint32_t CNDTR5;
+  __IO uint32_t CPAR5;
+  __IO uint32_t CMAR5;
+
+  __IO uint32_t RESERVED5;
+
+  __IO uint32_t CCR6;
+  __IO uint32_t CNDTR6;
+  __IO uint32_t CPAR6;
+  __IO uint32_t CMAR6;
+
+  __IO uint32_t RESERVED6;
+
+  __IO uint32_t CCR7;
+  __IO uint32_t CNDTR7;
+  __IO uint32_t CPAR7;
+  __IO uint32_t CMAR7;
   // end of my inserts
   // more register address are in manula on the page 157
   

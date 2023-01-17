@@ -14,4 +14,4 @@ Cílem tohoto projektu je se pokusit změřit vzdálenost mezi cívkou a kovový
 
 ## Schéma zapojení
 
-![sber-dat/sber-dat.svg](sber-dat/sber-dat.svg)
+![schema/sber-dat/sber-dat.svg](schema/sber-dat/sber-dat.svg)

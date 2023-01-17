@@ -4,7 +4,7 @@
 #define DISPLAY_HIGHT 64
 // #define OLED_I2C_ADDRESS 0x78 // real value is 0x3C, this is for aligning
 #define OLED_I2C_ADDRESS 0x79 // real value is 0x3C, this is for aligning
-#define DATA_SIZE 1000
+#define DATA_SIZE 10
 #define CHECK_BIT(var, pos) ((var) & (1 << (pos)))
 #define NULL ((uint16_t *)0)
 
@@ -17,6 +17,8 @@ char *welcome = "The start of measuring!";
 char *nums = "123456789";
 uint16_t i;
 uint16_t values[DATA_SIZE];
+uint16_t reference[DATA_SIZE];
+uint16_t tmpA[DATA_SIZE];
 
 /*Function definitions*/
 static void RCC_Configuration(void);
@@ -34,6 +36,8 @@ static void I2C_start(void);
 static void I2C_write(uint16_t data);
 static void I2C_address(uint16_t target);
 static void I2C_stop(void);
+
+uint16_t get_voltage(void);
 
 uint16_t USART_WaitToReceivedData(USART_TypeDef *USARTx);
 /**
@@ -66,19 +70,19 @@ int main(void)
    AD1_configuration();
    DMA_configuration();
 
-   printU(nums, 1, USART2);
-   I2C_init();
-   printU(nums, 1, USART2);
-   I2C_start();
-   printU(nums, 1, USART2);
-   I2C_address(0x79);
-   printU(nums, 1, USART2);
-   I2C_write(0xA7);
-   printU(nums, 1, USART2);
-   I2C_write(0xAF);
-   printU(nums, 1, USART2);
-   I2C_stop();
-   printU(nums, 1, USART2);
+   // printU(nums, 1, USART2);
+   // I2C_init();
+   // printU(nums, 1, USART2);
+   // I2C_start();
+   // printU(nums, 1, USART2);
+   // I2C_address(0x79);
+   // printU(nums, 1, USART2);
+   // I2C_write(0xA7);
+   // printU(nums, 1, USART2);
+   // I2C_write(0xAF);
+   // printU(nums, 1, USART2);
+   // I2C_stop();
+   // printU(nums, 1, USART2);
 
    /* Clear TC flag */
    USART2->SR &= 0xFFBF;
@@ -94,14 +98,20 @@ int main(void)
       if (GPIOA->IDR & 0x1) { // je PA0 stisknuto??
          blue_led_on();
 
-         for (i = 0; i < DATA_SIZE; ++i) {
-            printUint16(i, USART2);
-            USART_SendData(USART2, '.');
-            USART_SendData(USART2, ' ');
-            printUint16(values[i], USART2);
-            USART_SendData(USART2, '\r');
-            USART_SendData(USART2, '\n');
-         }
+         tmp = get_voltage();
+
+         printUint16(tmp, USART2);
+         USART_SendData(USART2, '\r');
+         USART_SendData(USART2, '\n');
+
+         // for (i = 0; i < DATA_SIZE; ++i) {
+         //    printUint16(i, USART2);
+         //    USART_SendData(USART2, '.');
+         //    USART_SendData(USART2, ' ');
+         //    printUint16(values[i], USART2);
+         //    USART_SendData(USART2, '\r');
+         //    USART_SendData(USART2, '\n');
+         // }
 
       } else {
          blue_led_off();
@@ -229,6 +239,11 @@ static void USART2_Configuration(void)
 
 static void TIM2_configuration_PWM(void)
 {
+   // TIM2->DIER |= TIM_DIER_CC2IE;
+   // TIM2->DIER |= TIM_DIER_CC2DE;
+   // TIM2->EGR |= TIM_EGR_TG;
+   // TIM2->EGR |= TIM_EGR_CC2G;
+
    TIM2->CR1 = 0x0080;   // turn of ARPE bit
    TIM2->CCMR1 = 0x6800; // config channel 2
    TIM2->PSC = 0;
@@ -276,7 +291,8 @@ static void I2C_init(void)
    I2C2->CR2 |= I2C_CR2_ITEVTEN;
    I2C2->CR2 |= I2C_CR2_ITERREN;
    I2C2->CR2 |= I2C_CR2_ITBUFEN;
-   I2C2->CR2 |= I2C_CR2_DMAEN; // eneable DMA request
+   // I2C2->CR2 |= I2C_CR2_DMAEN; // eneable DMA request
+   I2C2->CR1 |= I2C_CR1_ENGC;
 
    // Set own I2C address
    I2C2->OAR1 |= 0x7A;
@@ -350,9 +366,15 @@ static void DMA_configuration(void)
    DMA1->CCR1 |= DMA_CCR1_MINC;    // Memory increment mode
    DMA1->CCR1 |= DMA_CCR1_CIRC;    // Use array as circual
 
+   // Configuration of the channel 1 for ADC1
    DMA1->CNDTR1 = DATA_SIZE;        // Count of elelement to transfer
    DMA1->CPAR1 = 0x40012400 + 0x4C; // Address of peripherals (ADC1->DR)
    DMA1->CMAR1 = (uint32_t)values;  // Address of target array
+
+   // Configuration of the channel 7 for reference from PWM
+   // DMA1->CNDTR1 = DATA_SIZE;          // Count of elelement to transfer
+   // DMA1->CPAR7 = 0x40000002;          // Address of peripherals (TIM2->CNT)
+   // DMA1->CMAR7 = (uint32_t)reference; // Address to target array
 
    DMA1->CCR1 |= DMA_CCR1_EN; // Start DMA
 }
@@ -406,3 +428,10 @@ static void printUint16(uint16_t number, USART_TypeDef *USARTx)
 static void blue_led_on(void) { GPIOC->BSRR |= 0x100; }
 
 static void blue_led_off(void) { GPIOC->BSRR |= 0x1000000; }
+
+uint16_t get_voltage(void)
+{
+   // calculate offset
+   // multiply by reference (+1, -1)
+   // demodule
+}
